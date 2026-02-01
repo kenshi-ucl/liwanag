@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 import { CheckCircle2, Loader2, ExternalLink, Linkedin } from 'lucide-react';
 import { useState } from 'react';
 
@@ -25,6 +25,7 @@ interface LeadTableProps {
   selectedLeads: Set<string>;
   onSelectAll: () => void;
   onSelectLead: (id: string) => void;
+  onRefresh: () => Promise<void>;
 }
 
 /**
@@ -38,41 +39,31 @@ interface LeadTableProps {
  * 
  * Requirements: 9.1, 9.2, 9.3, 9.4
  */
-export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead }: LeadTableProps) {
-  const queryClient = useQueryClient();
+export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onRefresh }: LeadTableProps) {
+  const router = useRouter();
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
-  const syncMutation = useMutation({
-    mutationFn: async (subscriberId: string) => {
+  const handleSync = async (id: string) => {
+    setSyncingId(id);
+    try {
       const response = await fetch('/api/leads/sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ subscriberIds: [subscriberId] }),
+        body: JSON.stringify({ subscriberIds: [id] }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to sync lead');
       }
 
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leads'] });
-      queryClient.invalidateQueries({ queryKey: ['hidden-gems'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
-      setSyncingId(null);
-    },
-    onError: (error) => {
+      await onRefresh();
+    } catch (error) {
       console.error('Sync error:', error);
+    } finally {
       setSyncingId(null);
-    },
-  });
-
-  const handleSync = (id: string) => {
-    setSyncingId(id);
-    syncMutation.mutate(id);
+    }
   };
 
   if (leads.length === 0) {

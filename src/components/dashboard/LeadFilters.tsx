@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-router';
+import { useRouter } from '@tanstack/react-router';
 import { Loader2, Search, Filter, CheckCircle2, X } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { LeadTable } from './LeadTable';
 
 interface Subscriber {
@@ -41,7 +41,7 @@ interface FilterState {
  * Requirements: 8.1, 8.2, 8.3, 8.4, 8.5
  */
 export function LeadFilters() {
-  const queryClient = useQueryClient();
+  const router = useRouter();
   const [filters, setFilters] = useState<FilterState>({
     minICPScore: 0,
     companyName: '',
@@ -49,6 +49,10 @@ export function LeadFilters() {
     syncStatus: 'all',
   });
   const [selectedLeads, setSelectedLeads] = useState<Set<string>>(new Set());
+  const [data, setData] = useState<{ leads: Subscriber[]; totalCount: number } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Build query string from filters
   const queryString = useMemo(() => {
@@ -70,46 +74,54 @@ export function LeadFilters() {
     return params.toString();
   }, [filters]);
 
-  const { data, isLoading, error } = useQuery<{ leads: Subscriber[]; totalCount: number }>({
-    queryKey: ['leads', queryString],
-    queryFn: async () => {
+  const fetchLeads = async () => {
+    try {
       const url = queryString ? `/api/leads?${queryString}` : '/api/leads';
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch leads');
       }
-      return response.json();
-    },
-    refetchInterval: 10000, // Refetch every 10 seconds
-  });
+      const result = await response.json();
+      setData(result);
+      setError(null);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const bulkSyncMutation = useMutation({
-    mutationFn: async (subscriberIds: string[]) => {
+  useEffect(() => {
+    setIsLoading(true);
+    fetchLeads();
+    const interval = setInterval(fetchLeads, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [queryString]);
+
+  const handleBulkSync = async () => {
+    if (selectedLeads.size === 0) return;
+
+    setIsSyncing(true);
+    try {
       const response = await fetch('/api/leads/sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ subscriberIds }),
+        body: JSON.stringify({ subscriberIds: Array.from(selectedLeads) }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to sync leads');
       }
 
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leads'] });
-      queryClient.invalidateQueries({ queryKey: ['hidden-gems'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       setSelectedLeads(new Set());
-    },
-  });
-
-  const handleBulkSync = () => {
-    if (selectedLeads.size > 0) {
-      bulkSyncMutation.mutate(Array.from(selectedLeads));
+      await fetchLeads();
+    } catch (error) {
+      console.error('Bulk sync error:', error);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -264,10 +276,10 @@ export function LeadFilters() {
           {selectedLeads.size > 0 && (
             <button
               onClick={handleBulkSync}
-              disabled={bulkSyncMutation.isPending}
+              disabled={isSyncing}
               className="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 disabled:bg-slate-300 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
-              {bulkSyncMutation.isPending ? (
+              {isSyncing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Syncing...
@@ -303,6 +315,7 @@ export function LeadFilters() {
           selectedLeads={selectedLeads}
           onSelectAll={handleSelectAll}
           onSelectLead={handleSelectLead}
+          onRefresh={fetchLeads}
         />
       )}
     </div>
