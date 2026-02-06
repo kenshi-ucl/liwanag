@@ -6,11 +6,15 @@ import * as schema from './schema';
 // Create PostgreSQL connection
 const connectionString = env.DATABASE_URL;
 
-// Create postgres client
+// Determine if we need SSL (Heroku requires it)
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Create postgres client with SSL in production
 export const client = postgres(connectionString, {
   max: 10,
   idle_timeout: 20,
   connect_timeout: 10,
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
 });
 
 // Create Drizzle ORM instance
