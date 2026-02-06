@@ -1,1 +1,1 @@
-web: npm run preview
+web: node .output/server/index.mjs
