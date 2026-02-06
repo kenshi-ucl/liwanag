@@ -1,27 +1,63 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Sparkles } from 'lucide-react';
 import { DarkFunnelMeter } from '@/components/dashboard/DarkFunnelMeter';
 import { MetricsCards } from '@/components/dashboard/MetricsCards';
 import { HiddenGemsList } from '@/components/dashboard/HiddenGemsList';
 import { LeadFilters } from '@/components/dashboard/LeadFilters';
+import { calculateDashboardMetrics } from '@/lib/dashboard/metrics';
+import { getHiddenGems as fetchHiddenGems } from '@/lib/dashboard/lead-filter';
 
-// Server function to fetch dashboard metrics
+// Server function to fetch dashboard metrics - calls database directly
 const getDashboardMetrics = createServerFn({ method: 'GET' }).handler(async () => {
-  const response = await fetch('http://localhost:3000/api/dashboard/metrics');
-  if (!response.ok) {
-    throw new Error('Failed to fetch dashboard metrics');
+  try {
+    const metrics = await calculateDashboardMetrics();
+    return {
+      totalSubscribers: metrics.totalSubscribers,
+      enrichedCount: metrics.enrichedCount,
+      personalEmailCount: metrics.personalEmailCount,
+      pendingCount: metrics.pendingCount,
+      darkFunnelPercentage: metrics.darkFunnelPercentage,
+      totalCreditsUsed: metrics.totalCreditsUsed,
+      estimatedPendingCredits: metrics.estimatedPendingCredits,
+    };
+  } catch (error) {
+    console.error('Error fetching dashboard metrics:', error);
+    // Return empty data on error
+    return {
+      totalSubscribers: 0,
+      enrichedCount: 0,
+      personalEmailCount: 0,
+      pendingCount: 0,
+      darkFunnelPercentage: 0,
+      totalCreditsUsed: 0,
+      estimatedPendingCredits: 0,
+    };
   }
-  return response.json();
 });
 
-// Server function to fetch hidden gems
+// Server function to fetch hidden gems - calls database directly
 const getHiddenGems = createServerFn({ method: 'GET' }).handler(async () => {
-  const response = await fetch('http://localhost:3000/api/leads?minICPScore=71');
-  if (!response.ok) {
-    throw new Error('Failed to fetch hidden gems');
+  try {
+    const hiddenGems = await fetchHiddenGems(70); // ICP score > 70
+    // Serialize the data to ensure proper JSON serialization
+    return {
+      leads: hiddenGems.map(lead => ({
+        ...lead,
+        rawPayload: (lead.rawPayload ?? null) as Record<string, any> | null,
+        createdAt: lead.createdAt.toISOString(),
+        updatedAt: lead.updatedAt.toISOString(),
+        syncedAt: lead.syncedAt?.toISOString() ?? null,
+      })),
+      totalCount: hiddenGems.length,
+    };
+  } catch (error) {
+    console.error('Error fetching hidden gems:', error);
+    return {
+      leads: [],
+      totalCount: 0,
+    };
   }
-  return response.json();
 });
 
 export const Route = createFileRoute('/dashboard')({

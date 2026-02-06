@@ -17,7 +17,7 @@ import {
 } from './jsonb';
 
 describe('JSONB Validation Properties', () => {
-  // Feature: lumina-mvp, Property 37: JSONB storage validation
+  // Feature: liwanag-mvp, Property 37: JSONB storage validation
   // Validates: Requirements 13.4
   describe('Property 37: JSONB storage validation', () => {
     it('should validate that all JSON-serializable data is valid for JSONB storage', () => {
@@ -39,7 +39,7 @@ describe('JSONB Validation Properties', () => {
           (value) => {
             // Should not throw for valid JSON-serializable data
             const validated = validateJSONB(value);
-            
+
             // Validated data should be equivalent to original
             expect(validated).toEqual(value);
           }
@@ -60,7 +60,7 @@ describe('JSONB Validation Properties', () => {
           (payload) => {
             // Should validate successfully
             const validated = validateWebhookPayloadForJSONB(payload);
-            
+
             // Should preserve all fields
             expect(validated).toEqual(payload);
           }
@@ -85,7 +85,7 @@ describe('JSONB Validation Properties', () => {
           (data) => {
             // Should validate successfully
             const validated = validateEnrichmentDataForJSONB(data);
-            
+
             // Should preserve all fields
             expect(validated).toEqual(data);
           }
@@ -155,10 +155,10 @@ describe('JSONB Validation Properties', () => {
           (data) => {
             // First validation
             const validated1 = validateJSONB(data);
-            
+
             // Second validation (should be idempotent)
             const validated2 = validateJSONB(validated1);
-            
+
             // Both should be equal
             expect(validated1).toEqual(validated2);
             expect(validated2).toEqual(data);
@@ -173,7 +173,7 @@ describe('JSONB Validation Properties', () => {
     it('should reject circular references', () => {
       const circular: any = { a: 1 };
       circular.self = circular;
-      
+
       expect(() => validateJSONB(circular)).toThrow(JSONBValidationError);
     });
 
@@ -190,7 +190,7 @@ describe('JSONB Validation Properties', () => {
         email: 'test@example.com',
         callback: () => console.log('test'),
       };
-      
+
       // Functions are omitted during JSON serialization
       const validated = validateJSONB(dataWithFunction);
       expect(validated).not.toHaveProperty('callback');
@@ -202,7 +202,7 @@ describe('JSONB Validation Properties', () => {
         email: 'test@example.com',
         [sym]: 'value',
       };
-      
+
       // Symbols are omitted during JSON serialization
       const validated = validateJSONB(dataWithSymbol);
       // Check that the symbol property is not in the validated object
@@ -221,7 +221,7 @@ describe('JSONB Validation Properties', () => {
           }),
           (data) => {
             const result = safeValidateJSONB(data);
-            
+
             expect(result.isValid).toBe(true);
             expect(result.data).toEqual(data);
             expect(result.error).toBeUndefined();
@@ -234,9 +234,9 @@ describe('JSONB Validation Properties', () => {
     it('should return failure for circular references without throwing', () => {
       const circular: any = { a: 1 };
       circular.self = circular;
-      
+
       const result = safeValidateJSONB(circular);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.error).toBeDefined();
       expect(result.data).toBeUndefined();
@@ -271,7 +271,7 @@ describe('JSONB Validation Properties', () => {
         '{key: "value"}',     // Unquoted key
         '{"key": "value",}',  // Trailing comma
       ];
-      
+
       for (const malformed of malformedExamples) {
         expect(isValidJSONB(malformed)).toBe(false);
       }
@@ -288,10 +288,10 @@ describe('JSONB Validation Properties', () => {
           }),
           (data) => {
             const prepared = prepareForJSONB(data);
-            
+
             // Should be equivalent to original
             expect(prepared).toEqual(data);
-            
+
             // Should be valid JSON
             const json = JSON.stringify(prepared);
             expect(isValidJSONB(json)).toBe(true);
@@ -339,7 +339,7 @@ describe('JSONB Validation Properties', () => {
           }),
           (payload) => {
             const validated = validateJSONB(payload);
-            
+
             // Should preserve all fields
             expect(validated.email).toBe(payload.email);
             expect(validated.source).toBe(payload.source);
@@ -369,7 +369,7 @@ describe('JSONB Validation Properties', () => {
           }),
           (callback) => {
             const validated = validateJSONB(callback);
-            
+
             // Should preserve structure
             expect(validated.enrichmentId).toBe(callback.enrichmentId);
             expect(validated.results).toHaveLength(callback.results.length);

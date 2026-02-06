@@ -51,7 +51,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
    */
   const applyCompanyNameFilter = (subscribers: Subscriber[], searchTerm: string): Subscriber[] => {
     const lowerSearch = searchTerm.toLowerCase();
-    return subscribers.filter(s => 
+    return subscribers.filter(s =>
       s.companyName !== null && s.companyName.toLowerCase().includes(lowerSearch)
     );
   };
@@ -61,7 +61,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
    */
   const applyJobTitleFilter = (subscribers: Subscriber[], searchTerm: string): Subscriber[] => {
     const lowerSearch = searchTerm.toLowerCase();
-    return subscribers.filter(s => 
+    return subscribers.filter(s =>
       s.jobTitle !== null && s.jobTitle.toLowerCase().includes(lowerSearch)
     );
   };
@@ -70,12 +70,12 @@ describe('Lead Filtering - Property-Based Tests', () => {
    * Helper function to apply sync status filter
    */
   const applySyncStatusFilter = (subscribers: Subscriber[], status: 'synced' | 'unsynced'): Subscriber[] => {
-    return subscribers.filter(s => 
+    return subscribers.filter(s =>
       status === 'synced' ? s.syncedToCRM === true : s.syncedToCRM === false
     );
   };
 
-  // Feature: lumina-mvp, Property 28: ICP score filtering
+  // Feature: liwanag-mvp, Property 28: ICP score filtering
   it('should filter leads by minimum ICP score', () => {
     fc.assert(
       fc.property(
@@ -83,7 +83,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
         fc.integer({ min: 0, max: 100 }), // minimum score threshold
         (scores, minScore) => {
           // Create mock subscribers with various ICP scores
-          const mockSubscribers = scores.map(score => 
+          const mockSubscribers = scores.map(score =>
             createMockSubscriber({ icpScore: score })
           );
 
@@ -119,7 +119,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
     expect(filtered.every(s => s.icpScore !== null && s.icpScore >= 70)).toBe(true);
   });
 
-  // Feature: lumina-mvp, Property 29: Case-insensitive partial search
+  // Feature: liwanag-mvp, Property 29: Case-insensitive partial search
   it('should perform case-insensitive partial matching on company name', () => {
     fc.assert(
       fc.property(
@@ -137,7 +137,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
         ),
         fc.constantFrom('corp', 'CORP', 'Corp', 'CoRp'), // Various case combinations
         (mockData, searchTerm) => {
-          const mockSubscribers = mockData.map(data => 
+          const mockSubscribers = mockData.map(data =>
             createMockSubscriber({ companyName: data.companyName })
           );
 
@@ -178,7 +178,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
         ),
         fc.constantFrom('director', 'DIRECTOR', 'Director', 'DiReCtoR'),
         (mockData, searchTerm) => {
-          const mockSubscribers = mockData.map(data => 
+          const mockSubscribers = mockData.map(data =>
             createMockSubscriber({ jobTitle: data.jobTitle })
           );
 
@@ -214,7 +214,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
     expect(filtered.length).toBe(2);
   });
 
-  // Feature: lumina-mvp, Property 30: Filter combination with AND logic
+  // Feature: liwanag-mvp, Property 30: Filter combination with AND logic
   it('should combine multiple filters with AND logic', () => {
     fc.assert(
       fc.property(
@@ -236,7 +236,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
           { minLength: 10, maxLength: 30 }
         ),
         (mockData) => {
-          const mockSubscribers = mockData.map(data => 
+          const mockSubscribers = mockData.map(data =>
             createMockSubscriber(data)
           );
 
@@ -257,7 +257,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
           });
 
           // Verify count matches manual filtering
-          const expectedCount = mockData.filter(d => 
+          const expectedCount = mockData.filter(d =>
             d.icpScore >= minScore &&
             d.companyName.toLowerCase().includes(companySearch.toLowerCase()) &&
             d.jobTitle.toLowerCase().includes(jobSearch.toLowerCase())
@@ -280,7 +280,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
         ),
         fc.constantFrom('synced' as const, 'unsynced' as const),
         (mockData, syncStatus) => {
-          const mockSubscribers = mockData.map(data => 
+          const mockSubscribers = mockData.map(data =>
             createMockSubscriber(data)
           );
 
@@ -296,7 +296,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
           });
 
           // Verify count
-          const expectedCount = mockData.filter(d => 
+          const expectedCount = mockData.filter(d =>
             syncStatus === 'synced' ? d.syncedToCRM === true : d.syncedToCRM === false
           ).length;
           expect(filtered.length).toBe(expectedCount);
@@ -306,7 +306,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 31: Filtered result count accuracy
+  // Feature: liwanag-mvp, Property 31: Filtered result count accuracy
   it('should return accurate total count of filtered results', () => {
     fc.assert(
       fc.property(
@@ -324,7 +324,7 @@ describe('Lead Filtering - Property-Based Tests', () => {
         ),
         fc.integer({ min: 0, max: 100 }),
         (mockData, minScore) => {
-          const mockSubscribers = mockData.map(data => 
+          const mockSubscribers = mockData.map(data =>
             createMockSubscriber(data)
           );
 

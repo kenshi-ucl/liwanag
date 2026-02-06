@@ -21,8 +21,13 @@ export interface EnrichmentStatusCounts {
 /**
  * Calculate all dashboard metrics in a single query batch
  * Requirements: 7.1, 7.2, 7.3
+ * 
+ * @param organizationId - The organization ID for multi-tenant support
  */
-export async function calculateDashboardMetrics(): Promise<DashboardMetrics> {
+export async function calculateDashboardMetrics(organizationId?: string): Promise<DashboardMetrics> {
+  // Build where clause for organization filtering
+  const orgFilter = organizationId ? eq(subscribers.organizationId, organizationId) : undefined;
+  
   // Query 1: Subscriber counts
   const subscriberStats = await db
     .select({
@@ -30,7 +35,8 @@ export async function calculateDashboardMetrics(): Promise<DashboardMetrics> {
       personalEmailCount: sql<number>`count(*) filter (where ${subscribers.emailType} = 'personal')::int`,
       enrichedCount: sql<number>`count(*) filter (where ${subscribers.emailType} = 'personal' and ${subscribers.linkedinUrl} is not null)::int`,
     })
-    .from(subscribers);
+    .from(subscribers)
+    .where(orgFilter);
 
   const stats = subscriberStats[0] || {
     totalSubscribers: 0,
@@ -38,6 +44,9 @@ export async function calculateDashboardMetrics(): Promise<DashboardMetrics> {
     enrichedCount: 0,
   };
 
+  // Build where clause for enrichment jobs
+  const jobOrgFilter = organizationId ? eq(enrichmentJobs.organizationId, organizationId) : undefined;
+  
   // Query 2: Enrichment job counts and credit totals
   const jobStats = await db
     .select({
@@ -45,7 +54,8 @@ export async function calculateDashboardMetrics(): Promise<DashboardMetrics> {
       totalCreditsUsed: sql<number>`coalesce(sum(${enrichmentJobs.actualCredits}), 0)::int`,
       estimatedPendingCredits: sql<number>`coalesce(sum(${enrichmentJobs.estimatedCredits}) filter (where ${enrichmentJobs.status} = 'pending'), 0)::int`,
     })
-    .from(enrichmentJobs);
+    .from(enrichmentJobs)
+    .where(jobOrgFilter);
 
   const jobs = jobStats[0] || {
     pendingCount: 0,
@@ -74,15 +84,20 @@ export async function calculateDashboardMetrics(): Promise<DashboardMetrics> {
 /**
  * Get enrichment job status aggregation
  * Requirements: 4.1
+ * 
+ * @param organizationId - The organization ID for multi-tenant support
  */
-export async function getEnrichmentStatusCounts(): Promise<EnrichmentStatusCounts> {
+export async function getEnrichmentStatusCounts(organizationId?: string): Promise<EnrichmentStatusCounts> {
+  const orgFilter = organizationId ? eq(enrichmentJobs.organizationId, organizationId) : undefined;
+  
   const result = await db
     .select({
       pending: sql<number>`count(*) filter (where ${enrichmentJobs.status} = 'pending')::int`,
       enriched: sql<number>`count(*) filter (where ${enrichmentJobs.status} = 'enriched')::int`,
       failed: sql<number>`count(*) filter (where ${enrichmentJobs.status} = 'failed')::int`,
     })
-    .from(enrichmentJobs);
+    .from(enrichmentJobs)
+    .where(orgFilter);
 
   return result[0] || {
     pending: 0,

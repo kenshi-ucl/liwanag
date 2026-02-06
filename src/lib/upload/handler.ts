@@ -15,6 +15,7 @@ export interface UploadResult {
  */
 export async function processFileUpload(
   file: File,
+  organizationId: string,
   encoding: FileEncoding = 'utf-8'
 ): Promise<UploadResult> {
   try {
@@ -55,7 +56,7 @@ export async function processFileUpload(
     }
     
     // Process bulk upload
-    const summary = await processBulkUpload(parseResult.rows);
+    const summary = await processBulkUpload(parseResult.rows, organizationId);
     
     // Merge parsing errors with processing errors
     summary.errors = [...parseResult.errors, ...summary.errors];

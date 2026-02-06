@@ -16,6 +16,9 @@ import { initializeTestDatabase, cleanupTestDatabase, closeTestDatabase } from '
  * 5. Upload summary accuracy
  */
 
+// Test organization ID for all integration tests
+const TEST_ORG_ID = '00000000-0000-4000-8000-000000000001';
+
 describe('File Upload Flow Integration', () => {
   beforeAll(async () => {
     await initializeTestDatabase();
@@ -40,7 +43,7 @@ alice@acme.com,Alice Brown,Acme Corp`;
     const file = new File([csvContent], 'subscribers.csv', { type: 'text/csv' });
 
     // Process file upload
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
 
     // Verify upload succeeded
     expect(result.success).toBe(true);
@@ -87,7 +90,7 @@ jane@yahoo.com,product`;
 
     const file = new File([csvContent], 'duplicates.csv', { type: 'text/csv' });
 
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
 
     expect(result.success).toBe(true);
     const summary = result.summary!;
@@ -116,7 +119,7 @@ john@gmail.com
 jane@yahoo.com`;
 
     const file1 = new File([csvContent1], 'batch1.csv', { type: 'text/csv' });
-    const result1 = await processFileUpload(file1);
+    const result1 = await processFileUpload(file1, TEST_ORG_ID);
 
     expect(result1.success).toBe(true);
     expect(result1.summary!.newSubscribers).toBe(2);
@@ -128,7 +131,7 @@ bob@gmail.com
 alice@outlook.com`;
 
     const file2 = new File([csvContent2], 'batch2.csv', { type: 'text/csv' });
-    const result2 = await processFileUpload(file2);
+    const result2 = await processFileUpload(file2, TEST_ORG_ID);
 
     expect(result2.success).toBe(true);
     const summary2 = result2.summary!;
@@ -154,7 +157,7 @@ Jane Smith,Tech Inc`;
 
     const file = new File([csvContent], 'invalid.csv', { type: 'text/csv' });
 
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
 
     // Should fail with descriptive error
     expect(result.success).toBe(false);
@@ -171,7 +174,7 @@ Jane Smith,Tech Inc`;
 
     const file = new File([csvContent], 'empty.csv', { type: 'text/csv' });
 
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
 
     // Should fail with descriptive error
     expect(result.success).toBe(false);
@@ -192,7 +195,7 @@ bob@outlook.com`;
 
     const file = new File([csvContent], 'mixed.csv', { type: 'text/csv' });
 
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
 
     expect(result.success).toBe(true);
     const summary = result.summary!;
@@ -225,7 +228,7 @@ bob@outlook.com`;
     const file = new File([csvContent], 'large.csv', { type: 'text/csv' });
 
     const startTime = Date.now();
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
     const duration = Date.now() - startTime;
 
     expect(result.success).toBe(true);
@@ -254,7 +257,7 @@ jane@yahoo.com,waitlist`;
 
     const file = new File([csvContent], 'sources.csv', { type: 'text/csv' });
 
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
 
     expect(result.success).toBe(true);
 
@@ -278,7 +281,7 @@ charlie@outlook.com`;
 
     const file = new File([csvContent], 'mixed.csv', { type: 'text/csv' });
 
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
 
     expect(result.success).toBe(true);
     expect(result.summary!.newSubscribers).toBe(5);
@@ -309,7 +312,7 @@ charlie@outlook.com`;
     const largeContent = 'email\n' + 'a'.repeat(11 * 1024 * 1024);
     const file = new File([largeContent], 'toolarge.csv', { type: 'text/csv' });
 
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
 
     expect(result.success).toBe(false);
     expect(result.error).toContain('size exceeds maximum');

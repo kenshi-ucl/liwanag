@@ -1,6 +1,6 @@
 # ICP Scoring Module
 
-This module implements the Ideal Customer Profile (ICP) scoring engine for Lumina MVP. It calculates scores (0-100) for enriched subscribers based on company data to help identify high-value leads.
+This module implements the Ideal Customer Profile (ICP) scoring engine for Liwanag MVP. It calculates scores (0-100) for enriched subscribers based on company data to help identify high-value leads.
 
 ## Overview
 

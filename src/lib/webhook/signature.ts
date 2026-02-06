@@ -10,6 +10,19 @@ export interface WebhookValidationResult {
 }
 
 /**
+ * Creates an HMAC-SHA256 signature for a payload
+ * 
+ * @param payload - The raw payload as a string
+ * @param secret - The signing secret
+ * @returns The hex-encoded signature
+ */
+export function createHmacSignature(payload: string, secret: string): string {
+  const hmac = createHmac('sha256', secret);
+  hmac.update(payload);
+  return hmac.digest('hex');
+}
+
+/**
  * Validates a webhook signature using HMAC-SHA256
  * 
  * @param payload - The raw webhook payload as a string
@@ -24,9 +37,7 @@ export function validateWebhookSignature(
 ): WebhookValidationResult {
   try {
     // Generate HMAC-SHA256 hash of the payload
-    const hmac = createHmac('sha256', secret);
-    hmac.update(payload);
-    const expectedSignature = hmac.digest('hex');
+    const expectedSignature = createHmacSignature(payload, secret);
     
     // Use timing-safe comparison to prevent timing attacks
     const signatureBuffer = Buffer.from(signature);

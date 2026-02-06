@@ -2,7 +2,7 @@
 
 ## Overview
 
-Task 7 (Rilo workflow integration) has been successfully completed. This implementation provides a comprehensive workflow orchestration system that manages the asynchronous enrichment pipeline for the Lumina MVP.
+Task 7 (Rilo workflow integration) has been successfully completed. This implementation provides a comprehensive workflow orchestration system that manages the asynchronous enrichment pipeline for the Liwanag MVP.
 
 ## What Was Implemented
 
@@ -114,7 +114,7 @@ This implementation validates the following requirements from the design documen
 ## Files Created
 
 ```
-lumina/src/lib/workflow/
+liwanag/src/lib/workflow/
 ├── types.ts                          # Type definitions
 ├── engine.ts                         # Workflow execution engine
 ├── enrichment-workflow.ts            # Enrichment workflow definition
@@ -128,9 +128,9 @@ lumina/src/lib/workflow/
 ## Files Modified
 
 ```
-lumina/src/lib/webhook/handler.ts           # Added workflow trigger
-lumina/src/lib/upload/bulk-processor.ts     # Added workflow trigger
-lumina/src/lib/enrichment/webhook-receiver.ts  # Added event emission
+liwanag/src/lib/webhook/handler.ts           # Added workflow trigger
+liwanag/src/lib/upload/bulk-processor.ts     # Added workflow trigger
+liwanag/src/lib/enrichment/webhook-receiver.ts  # Added event emission
 ```
 
 ## Usage Example

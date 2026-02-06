@@ -3,7 +3,7 @@ import fc from 'fast-check';
 import { classifyEmail } from './classifier';
 
 describe('Email Classification', () => {
-  // Feature: lumina-mvp, Property 3: Email classification correctness
+  // Feature: liwanag-mvp, Property 3: Email classification correctness
   // Validates: Requirements 1.4
   it('should classify consumer domains as personal and others as corporate', () => {
     const consumerDomains = [
@@ -30,7 +30,7 @@ describe('Email Classification', () => {
         (email) => {
           const classification = classifyEmail(email);
           const domain = email.split('@')[1]?.toLowerCase();
-          
+
           if (domain && consumerDomains.includes(domain)) {
             expect(classification).toBe('personal');
           } else {

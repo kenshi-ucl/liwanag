@@ -42,7 +42,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
    * Requirements: 7.4 - enriched subscribers with ICP score > 70
    */
   const applyHiddenGemsFilter = (subscribers: Subscriber[], minScore: number = 70): Subscriber[] => {
-    return subscribers.filter(s => 
+    return subscribers.filter(s =>
       s.linkedinUrl !== null && // Must be enriched
       s.icpScore !== null &&
       s.icpScore > minScore // Strictly greater than threshold
@@ -65,7 +65,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
     );
   };
 
-  // Feature: lumina-mvp, Property 26: Hidden gems filtering
+  // Feature: liwanag-mvp, Property 26: Hidden gems filtering
   it('should filter enriched subscribers with ICP score > 70', () => {
     fc.assert(
       fc.property(
@@ -83,7 +83,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
           { minLength: 10, maxLength: 50 }
         ),
         (mockData) => {
-          const mockSubscribers = mockData.map(data => 
+          const mockSubscribers = mockData.map(data =>
             createMockSubscriber(data)
           );
 
@@ -101,7 +101,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
           });
 
           // Verify count matches expected
-          const expectedCount = mockData.filter(d => 
+          const expectedCount = mockData.filter(d =>
             d.linkedinUrl !== null &&
             d.icpScore !== null &&
             d.icpScore > 70
@@ -169,7 +169,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
         ),
         fc.integer({ min: 0, max: 100 }), // Custom threshold
         (mockData, customThreshold) => {
-          const mockSubscribers = mockData.map(data => 
+          const mockSubscribers = mockData.map(data =>
             createMockSubscriber(data)
           );
 
@@ -189,7 +189,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 27: Lead detail completeness
+  // Feature: liwanag-mvp, Property 27: Lead detail completeness
   it('should include all enrichment fields in results', () => {
     fc.assert(
       fc.property(
@@ -225,7 +225,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
           { minLength: 5, maxLength: 20 }
         ),
         (mockData) => {
-          const mockSubscribers = mockData.map(data => 
+          const mockSubscribers = mockData.map(data =>
             createMockSubscriber(data)
           );
 
@@ -234,7 +234,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
           // Verify all results have all enrichment field properties
           hiddenGems.forEach(subscriber => {
             expect(hasAllEnrichmentFields(subscriber)).toBe(true);
-            
+
             // Verify the structure includes all required fields
             expect(subscriber).toHaveProperty('linkedinUrl');
             expect(subscriber).toHaveProperty('jobTitle');
@@ -264,7 +264,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
     const hiddenGems = applyHiddenGemsFilter(subscribers, 70);
 
     expect(hiddenGems.length).toBe(1);
-    
+
     const result = hiddenGems[0];
     expect(result.linkedinUrl).toBe('https://linkedin.com/in/johndoe');
     expect(result.jobTitle).toBe('VP of Engineering');
@@ -291,7 +291,7 @@ describe('Hidden Gems Query - Property-Based Tests', () => {
     const hiddenGems = applyHiddenGemsFilter(subscribers, 70);
 
     expect(hiddenGems.length).toBe(1);
-    
+
     // Should still include the subscriber even with some null fields
     const result = hiddenGems[0];
     expect(result.linkedinUrl).not.toBeNull();

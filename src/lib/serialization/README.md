@@ -1,6 +1,6 @@
 # Serialization Module
 
-This module provides type-safe JSON serialization and JSONB validation utilities for the Lumina MVP.
+This module provides type-safe JSON serialization and JSONB validation utilities for the Liwanag MVP.
 
 ## Features
 

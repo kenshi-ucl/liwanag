@@ -82,7 +82,7 @@ describe('Property 20: Row-level security isolation', () => {
           fc.pre(!overlap);
           
           // Insert subscribers for org1 (bypass RLS for setup)
-          await db.execute(sql`SET LOCAL app.current_organization_id = ${org1Id}`);
+          await setOrganizationContext(db, org1Id);
           for (const email of uniqueOrg1Emails) {
             await db.insert(subscribers).values({
               organizationId: org1Id,
@@ -93,7 +93,7 @@ describe('Property 20: Row-level security isolation', () => {
           }
           
           // Insert subscribers for org2 (bypass RLS for setup)
-          await db.execute(sql`SET LOCAL app.current_organization_id = ${org2Id}`);
+          await setOrganizationContext(db, org2Id);
           for (const email of uniqueOrg2Emails) {
             await db.insert(subscribers).values({
               organizationId: org2Id,
@@ -155,7 +155,7 @@ describe('Property 20: Row-level security isolation', () => {
           fc.pre(org1Id !== org2Id && org1Email !== org2Email);
           
           // Create subscribers for both orgs (bypass RLS for setup)
-          await db.execute(sql`SET LOCAL app.current_organization_id = ${org1Id}`);
+          await setOrganizationContext(db, org1Id);
           const [org1Subscriber] = await db.insert(subscribers).values({
             organizationId: org1Id,
             email: org1Email,
@@ -163,7 +163,7 @@ describe('Property 20: Row-level security isolation', () => {
             source: 'test',
           }).returning();
           
-          await db.execute(sql`SET LOCAL app.current_organization_id = ${org2Id}`);
+          await setOrganizationContext(db, org2Id);
           const [org2Subscriber] = await db.insert(subscribers).values({
             organizationId: org2Id,
             email: org2Email,
@@ -172,7 +172,7 @@ describe('Property 20: Row-level security isolation', () => {
           }).returning();
           
           // Create enrichment jobs for both orgs
-          await db.execute(sql`SET LOCAL app.current_organization_id = ${org1Id}`);
+          await setOrganizationContext(db, org1Id);
           await db.insert(enrichmentJobs).values({
             organizationId: org1Id,
             subscriberId: org1Subscriber.id,
@@ -180,7 +180,7 @@ describe('Property 20: Row-level security isolation', () => {
             estimatedCredits: 3,
           });
           
-          await db.execute(sql`SET LOCAL app.current_organization_id = ${org2Id}`);
+          await setOrganizationContext(db, org2Id);
           await db.insert(enrichmentJobs).values({
             organizationId: org2Id,
             subscriberId: org2Subscriber.id,
@@ -236,7 +236,7 @@ describe('Property 20: Row-level security isolation', () => {
           fc.pre(org1Id !== org2Id);
           
           // Create subscriber for org1 (bypass RLS for setup)
-          await db.execute(sql`SET LOCAL app.current_organization_id = ${org1Id}`);
+          await setOrganizationContext(db, org1Id);
           const [subscriber] = await db.insert(subscribers).values({
             organizationId: org1Id,
             email,

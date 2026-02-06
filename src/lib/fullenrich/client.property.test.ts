@@ -8,7 +8,7 @@ import {
 } from './schemas';
 
 describe('FullEnrich API Response Validation', () => {
-  // Feature: lumina-mvp, Property 35: API response schema validation
+  // Feature: liwanag-mvp, Property 35: API response schema validation
   it('should validate bulk enrichment response against schema', () => {
     fc.assert(
       fc.property(
@@ -21,7 +21,7 @@ describe('FullEnrich API Response Validation', () => {
           // Valid response should pass validation
           const result = bulkEnrichmentResponseSchema.safeParse(response);
           expect(result.success).toBe(true);
-          
+
           if (result.success) {
             expect(result.data.enrichmentId).toBe(response.enrichmentId);
             expect(result.data.estimatedCredits).toBe(response.estimatedCredits);
@@ -33,7 +33,7 @@ describe('FullEnrich API Response Validation', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 35: API response schema validation
+  // Feature: liwanag-mvp, Property 35: API response schema validation
   it('should reject invalid bulk enrichment response', () => {
     fc.assert(
       fc.property(
@@ -65,7 +65,7 @@ describe('FullEnrich API Response Validation', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 35: API response schema validation
+  // Feature: liwanag-mvp, Property 35: API response schema validation
   it('should validate enrichment result against schema', () => {
     // Custom email generator that produces valid emails
     const validEmailArb = fc.tuple(
@@ -88,7 +88,7 @@ describe('FullEnrich API Response Validation', () => {
         (result) => {
           const validationResult = enrichmentResultSchema.safeParse(result);
           expect(validationResult.success).toBe(true);
-          
+
           if (validationResult.success) {
             expect(validationResult.data.email).toBe(result.email);
             expect(validationResult.data.creditsUsed).toBe(result.creditsUsed);
@@ -99,7 +99,7 @@ describe('FullEnrich API Response Validation', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 35: API response schema validation
+  // Feature: liwanag-mvp, Property 35: API response schema validation
   it('should reject enrichment result with invalid email', () => {
     fc.assert(
       fc.property(
@@ -116,7 +116,7 @@ describe('FullEnrich API Response Validation', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 35: API response schema validation
+  // Feature: liwanag-mvp, Property 35: API response schema validation
   it('should validate enrichment webhook callback against schema', () => {
     // Custom email generator that produces valid emails
     const validEmailArb = fc.tuple(
@@ -145,7 +145,7 @@ describe('FullEnrich API Response Validation', () => {
         (callback) => {
           const result = enrichmentWebhookCallbackSchema.safeParse(callback);
           expect(result.success).toBe(true);
-          
+
           if (result.success) {
             expect(result.data.enrichmentId).toBe(callback.enrichmentId);
             expect(result.data.results.length).toBe(callback.results.length);
@@ -156,7 +156,7 @@ describe('FullEnrich API Response Validation', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 35: API response schema validation
+  // Feature: liwanag-mvp, Property 35: API response schema validation
   it('should validate bulk enrichment request against schema', () => {
     // Custom email generator that produces valid emails
     const validEmailArb = fc.tuple(
@@ -173,7 +173,7 @@ describe('FullEnrich API Response Validation', () => {
         (request) => {
           const result = bulkEnrichmentRequestSchema.safeParse(request);
           expect(result.success).toBe(true);
-          
+
           if (result.success) {
             expect(result.data.emails.length).toBe(request.emails.length);
             expect(result.data.webhookUrl).toBe(request.webhookUrl);
@@ -184,7 +184,7 @@ describe('FullEnrich API Response Validation', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 35: API response schema validation
+  // Feature: liwanag-mvp, Property 35: API response schema validation
   it('should reject bulk enrichment request with too many emails', () => {
     fc.assert(
       fc.property(
@@ -201,7 +201,7 @@ describe('FullEnrich API Response Validation', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 35: API response schema validation
+  // Feature: liwanag-mvp, Property 35: API response schema validation
   it('should reject bulk enrichment request with empty emails array', () => {
     fc.assert(
       fc.property(

@@ -3,7 +3,7 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import * as schema from './schema';
 
 /**
- * Row-Level Security (RLS) Policies for Lumina
+ * Row-Level Security (RLS) Policies for Liwanag
  * 
  * These policies ensure that users can only access data belonging to their organization.
  * RLS is enforced at the database level, providing defense-in-depth security.
@@ -15,10 +15,10 @@ import * as schema from './schema';
 export async function enableSubscribersRLS(db: PostgresJsDatabase<typeof schema>) {
   // Enable RLS on subscribers table
   await db.execute(sql`ALTER TABLE subscribers ENABLE ROW LEVEL SECURITY`);
-  
+
   // Drop existing policies if they exist (for idempotency)
   await db.execute(sql`DROP POLICY IF EXISTS subscribers_isolation_policy ON subscribers`);
-  
+
   // Create policy: Users can only access subscribers from their organization
   // This assumes the application sets current_setting('app.current_organization_id')
   await db.execute(sql`
@@ -34,10 +34,10 @@ export async function enableSubscribersRLS(db: PostgresJsDatabase<typeof schema>
 export async function enableEnrichmentJobsRLS(db: PostgresJsDatabase<typeof schema>) {
   // Enable RLS on enrichment_jobs table
   await db.execute(sql`ALTER TABLE enrichment_jobs ENABLE ROW LEVEL SECURITY`);
-  
+
   // Drop existing policies if they exist (for idempotency)
   await db.execute(sql`DROP POLICY IF EXISTS enrichment_jobs_isolation_policy ON enrichment_jobs`);
-  
+
   // Create policy: Users can only access enrichment jobs from their organization
   await db.execute(sql`
     CREATE POLICY enrichment_jobs_isolation_policy ON enrichment_jobs
@@ -51,7 +51,9 @@ export async function enableEnrichmentJobsRLS(db: PostgresJsDatabase<typeof sche
  * This should be called at the beginning of each request with the authenticated user's organization
  */
 export async function setOrganizationContext(db: PostgresJsDatabase<typeof schema>, organizationId: string) {
-  await db.execute(sql`SET LOCAL app.current_organization_id = ${organizationId}`);
+  // Note: SET LOCAL doesn't support parameterized queries, so we use sql.raw
+  // The organizationId is validated as UUID by the caller
+  await db.execute(sql.raw(`SET LOCAL app.current_organization_id = '${organizationId}'`));
 }
 
 /**

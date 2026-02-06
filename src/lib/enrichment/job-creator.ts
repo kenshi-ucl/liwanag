@@ -27,9 +27,14 @@ export function estimateCredits(emailType: EmailType): number {
 /**
  * Create an enrichment job for a subscriber
  * Only creates jobs for personal email subscribers
+ * 
+ * @param subscriberId - The subscriber ID
+ * @param organizationId - The organization ID for multi-tenant support
+ * @param emailType - The email type (default: 'personal')
  */
 export async function createEnrichmentJob(
   subscriberId: string,
+  organizationId: string,
   emailType: EmailType = 'personal'
 ): Promise<string> {
   // Only create enrichment jobs for personal emails
@@ -40,6 +45,7 @@ export async function createEnrichmentJob(
   const credits = estimateCredits(emailType);
 
   const newJob: NewEnrichmentJob = {
+    organizationId,
     subscriberId,
     status: 'pending',
     estimatedCredits: credits,
@@ -54,9 +60,13 @@ export async function createEnrichmentJob(
 /**
  * Create enrichment job when a new personal email subscriber is added
  * This is the main entry point for automatic job creation
+ * 
+ * @param subscriberId - The subscriber ID
+ * @param organizationId - The organization ID for multi-tenant support
  */
 export async function createEnrichmentJobForSubscriber(
-  subscriberId: string
+  subscriberId: string,
+  organizationId: string
 ): Promise<string | null> {
   // Fetch subscriber to check email type
   const [subscriber] = await db
@@ -74,5 +84,5 @@ export async function createEnrichmentJobForSubscriber(
     return null;
   }
 
-  return createEnrichmentJob(subscriberId, 'personal');
+  return createEnrichmentJob(subscriberId, organizationId, 'personal');
 }

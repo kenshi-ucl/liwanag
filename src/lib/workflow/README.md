@@ -1,6 +1,6 @@
 # Workflow Orchestration Module
 
-This module implements a Rilo-style workflow orchestration system for managing asynchronous enrichment processes in the Lumina MVP.
+This module implements a Rilo-style workflow orchestration system for managing asynchronous enrichment processes in the Liwanag MVP.
 
 ## Overview
 

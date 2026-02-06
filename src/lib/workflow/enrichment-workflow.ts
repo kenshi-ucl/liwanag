@@ -20,6 +20,7 @@ import type { EnrichmentResult } from '@/lib/fullenrich/schemas';
 export interface EnrichmentWorkflowInput {
   subscriberId?: string;
   email?: string;
+  organizationId?: string;
   triggerType: 'subscriber-created' | 'scheduled-batch';
 }
 

@@ -78,12 +78,15 @@ export async function initializeTestDatabase() {
 /**
  * Clean up all test data from the database
  * Truncates all tables to ensure a clean state
+ * Uses RESTART IDENTITY to reset sequences and CASCADE to handle foreign keys
  */
 export async function cleanupTestDatabase() {
   try {
-    await db.execute(sql`TRUNCATE TABLE enrichment_jobs CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE subscribers CASCADE`);
-    await db.execute(sql`TRUNCATE TABLE webhook_logs CASCADE`);
+    // Truncate in correct order with CASCADE to handle foreign keys
+    // enrichment_jobs references subscribers, so truncate it first
+    await db.execute(sql`TRUNCATE TABLE enrichment_jobs RESTART IDENTITY CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE webhook_logs RESTART IDENTITY CASCADE`);
+    await db.execute(sql`TRUNCATE TABLE subscribers RESTART IDENTITY CASCADE`);
   } catch (error) {
     console.error('❌ Failed to cleanup test database:', error);
     throw error;

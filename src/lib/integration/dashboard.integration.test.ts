@@ -4,7 +4,7 @@ import { subscribers, enrichmentJobs, type NewSubscriber, type NewEnrichmentJob 
 import { eq } from 'drizzle-orm';
 import { calculateDashboardMetrics, getEnrichmentStatusCounts } from '@/lib/dashboard/metrics';
 import { filterLeads, getHiddenGems } from '@/lib/dashboard/lead-filter';
-import { syncLeadsToCRM } from '@/lib/crm/sync';
+import { bulkSyncToCRM } from '@/lib/crm/sync';
 import { initializeTestDatabase, cleanupTestDatabase, closeTestDatabase } from '@/test/db-setup';
 
 /**
@@ -15,6 +15,9 @@ import { initializeTestDatabase, cleanupTestDatabase, closeTestDatabase } from '
  * 2. Filtering and search with various combinations
  * 3. Result counts match actual data
  */
+
+// Test organization ID for all integration tests
+const TEST_ORG_ID = '00000000-0000-4000-8000-000000000001';
 
 describe('Dashboard Queries Integration', () => {
   beforeAll(async () => {
@@ -32,6 +35,7 @@ describe('Dashboard Queries Integration', () => {
   // Helper function to create test subscribers
   async function createTestSubscriber(data: Partial<NewSubscriber>) {
     const defaultData: NewSubscriber = {
+      organizationId: data.organizationId || TEST_ORG_ID,
       email: data.email || 'test@example.com',
       emailType: data.emailType || 'personal',
       source: data.source || 'newsletter',
@@ -54,6 +58,7 @@ describe('Dashboard Queries Integration', () => {
   // Helper function to create test enrichment job
   async function createTestJob(subscriberId: string, data: Partial<NewEnrichmentJob> = {}) {
     const defaultData: NewEnrichmentJob = {
+      organizationId: data.organizationId || TEST_ORG_ID,
       subscriberId,
       status: data.status || 'pending',
       enrichmentId: data.enrichmentId || null,
@@ -129,7 +134,7 @@ describe('Dashboard Queries Integration', () => {
       });
 
       // Calculate metrics
-      const metrics = await calculateDashboardMetrics();
+      const metrics = await calculateDashboardMetrics(TEST_ORG_ID);
 
       // Verify metrics
       expect(metrics.totalSubscribers).toBe(5);
@@ -142,7 +147,7 @@ describe('Dashboard Queries Integration', () => {
     });
 
     it('should handle empty database', async () => {
-      const metrics = await calculateDashboardMetrics();
+      const metrics = await calculateDashboardMetrics(TEST_ORG_ID);
 
       expect(metrics.totalSubscribers).toBe(0);
       expect(metrics.personalEmailCount).toBe(0);
@@ -171,7 +176,7 @@ describe('Dashboard Queries Integration', () => {
         });
       }
 
-      const metrics = await calculateDashboardMetrics();
+      const metrics = await calculateDashboardMetrics(TEST_ORG_ID);
 
       expect(metrics.personalEmailCount).toBe(10);
       expect(metrics.enrichedCount).toBe(7);
@@ -191,7 +196,7 @@ describe('Dashboard Queries Integration', () => {
       await createTestJob(sub4.id, { status: 'enriched', completedAt: new Date() });
       await createTestJob(sub5.id, { status: 'failed', failureReason: 'API error' });
 
-      const counts = await getEnrichmentStatusCounts();
+      const counts = await getEnrichmentStatusCounts(TEST_ORG_ID);
 
       expect(counts.pending).toBe(2);
       expect(counts.enriched).toBe(2);
@@ -253,7 +258,7 @@ describe('Dashboard Queries Integration', () => {
     });
 
     it('should filter by minimum ICP score', async () => {
-      const result = await filterLeads({ minICPScore: 70 });
+      const result = await filterLeads({ minICPScore: 70 }, TEST_ORG_ID);
 
       expect(result.totalCount).toBe(3);
       expect(result.leads.length).toBe(3);
@@ -263,7 +268,7 @@ describe('Dashboard Queries Integration', () => {
     });
 
     it('should filter by company name (case-insensitive partial match)', async () => {
-      const result = await filterLeads({ companyName: 'acme' });
+      const result = await filterLeads({ companyName: 'acme' }, TEST_ORG_ID);
 
       expect(result.totalCount).toBe(2);
       expect(result.leads.length).toBe(2);
@@ -274,18 +279,18 @@ describe('Dashboard Queries Integration', () => {
     });
 
     it('should filter by job title (case-insensitive partial match)', async () => {
-      const result = await filterLeads({ jobTitle: 'director' });
+      const result = await filterLeads({ jobTitle: 'director' }, TEST_ORG_ID);
 
       expect(result.totalCount).toBe(1);
       expect(result.leads[0].jobTitle).toBe('Director of Engineering');
     });
 
     it('should filter by sync status', async () => {
-      const syncedResult = await filterLeads({ syncStatus: 'synced' });
+      const syncedResult = await filterLeads({ syncStatus: 'synced' }, TEST_ORG_ID);
       expect(syncedResult.totalCount).toBe(1);
       expect(syncedResult.leads[0].syncedToCRM).toBe(true);
 
-      const unsyncedResult = await filterLeads({ syncStatus: 'unsynced' });
+      const unsyncedResult = await filterLeads({ syncStatus: 'unsynced' }, TEST_ORG_ID);
       expect(unsyncedResult.totalCount).toBe(3);
       unsyncedResult.leads.forEach(lead => {
         expect(lead.syncedToCRM).toBe(false);
@@ -297,7 +302,7 @@ describe('Dashboard Queries Integration', () => {
         minICPScore: 70,
         companyName: 'acme',
         syncStatus: 'unsynced',
-      });
+      }, TEST_ORG_ID);
 
       expect(result.totalCount).toBe(2);
       result.leads.forEach(lead => {
@@ -310,14 +315,14 @@ describe('Dashboard Queries Integration', () => {
     it('should return empty result when no matches', async () => {
       const result = await filterLeads({
         companyName: 'NonExistentCompany',
-      });
+      }, TEST_ORG_ID);
 
       expect(result.totalCount).toBe(0);
       expect(result.leads.length).toBe(0);
     });
 
     it('should handle partial job title matches', async () => {
-      const result = await filterLeads({ jobTitle: 'engineering' });
+      const result = await filterLeads({ jobTitle: 'engineering' }, TEST_ORG_ID);
 
       expect(result.totalCount).toBe(2);
       const titles = result.leads.map(l => l.jobTitle);
@@ -366,7 +371,7 @@ describe('Dashboard Queries Integration', () => {
     });
 
     it('should return only enriched leads with ICP score > 70', async () => {
-      const hiddenGems = await getHiddenGems(70);
+      const hiddenGems = await getHiddenGems(70, TEST_ORG_ID);
 
       expect(hiddenGems.length).toBe(2);
 
@@ -380,14 +385,14 @@ describe('Dashboard Queries Integration', () => {
     });
 
     it('should exclude unenriched subscribers even with high ICP score', async () => {
-      const hiddenGems = await getHiddenGems(70);
+      const hiddenGems = await getHiddenGems(70, TEST_ORG_ID);
 
       const emails = hiddenGems.map(g => g.email);
       expect(emails).not.toContain('unenriched@gmail.com');
     });
 
     it('should support custom threshold', async () => {
-      const hiddenGems = await getHiddenGems(90);
+      const hiddenGems = await getHiddenGems(90, TEST_ORG_ID);
 
       expect(hiddenGems.length).toBe(1);
       expect(hiddenGems[0].icpScore).toBe(95);
@@ -408,7 +413,7 @@ describe('Dashboard Queries Integration', () => {
         icpScore: 90,
       });
 
-      const hiddenGems = await getHiddenGems(70);
+      const hiddenGems = await getHiddenGems(70, TEST_ORG_ID);
 
       expect(hiddenGems.length).toBe(1);
       const gem = hiddenGems[0];
@@ -439,7 +444,7 @@ describe('Dashboard Queries Integration', () => {
       });
 
       // Sync leads
-      const syncResult = await syncLeadsToCRM([sub1.id, sub2.id]);
+      const syncResult = await bulkSyncToCRM([sub1.id, sub2.id]);
 
       expect(syncResult.synced).toBe(2);
 
@@ -476,7 +481,7 @@ describe('Dashboard Queries Integration', () => {
       expect(syncedResult.totalCount).toBe(1);
       expect(syncedResult.leads[0].id).toBe(synced.id);
 
-      const unsyncedResult = await filterLeads({ syncStatus: 'unsynced' });
+      const unsyncedResult = await filterLeads({ syncStatus: 'unsynced' }, TEST_ORG_ID);
       expect(unsyncedResult.totalCount).toBe(1);
       expect(unsyncedResult.leads[0].id).toBe(unsynced.id);
     });
@@ -501,18 +506,18 @@ describe('Dashboard Queries Integration', () => {
       const startTime = Date.now();
 
       // Test metrics calculation
-      const metrics = await calculateDashboardMetrics();
+      const metrics = await calculateDashboardMetrics(TEST_ORG_ID);
       expect(metrics.totalSubscribers).toBe(100);
 
       // Test filtering
       const filtered = await filterLeads({
         minICPScore: 80,
         companyName: 'acme',
-      });
+      }, TEST_ORG_ID);
       expect(filtered.totalCount).toBeGreaterThan(0);
 
       // Test hidden gems
-      const gems = await getHiddenGems(70);
+      const gems = await getHiddenGems(70, TEST_ORG_ID);
       expect(gems.length).toBeGreaterThan(0);
 
       const duration = Date.now() - startTime;
@@ -538,9 +543,9 @@ describe('Dashboard Queries Integration', () => {
       });
 
       // Query using different methods
-      const metrics = await calculateDashboardMetrics();
-      const hiddenGems = await getHiddenGems(70);
-      const filtered = await filterLeads({ minICPScore: 70 });
+      const metrics = await calculateDashboardMetrics(TEST_ORG_ID);
+      const hiddenGems = await getHiddenGems(70, TEST_ORG_ID);
+      const filtered = await filterLeads({ minICPScore: 70 }, TEST_ORG_ID);
 
       // Verify consistency
       expect(metrics.enrichedCount).toBe(2);

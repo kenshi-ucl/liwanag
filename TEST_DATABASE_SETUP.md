@@ -164,7 +164,7 @@ steps:
   
   - name: Wait for database
     run: |
-      until docker exec lumina-test-db pg_isready -U test -d lumina_test; do
+      until docker exec liwanag-test-db pg_isready -U test -d lumina_test; do
         sleep 1
       done
   
@@ -191,4 +191,4 @@ steps:
 
 ---
 
-For questions or issues, refer to the main README.md or the spec documents in `.kiro/specs/lumina-mvp/`.
+For questions or issues, refer to the main README.md or the spec documents in `.kiro/specs/liwanag-mvp/`.

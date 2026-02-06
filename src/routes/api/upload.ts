@@ -10,10 +10,10 @@ export const Route = createFileRoute('/api/upload')({
         try {
           // Parse multipart form data
           const formData = await request.formData();
-          
+
           // Get file from form data
           const file = formData.get('file');
-          
+
           if (!file || !(file instanceof File)) {
             return json(
               {
@@ -24,12 +24,12 @@ export const Route = createFileRoute('/api/upload')({
               { status: 400 }
             );
           }
-          
+
           // Get optional encoding parameter
           const encodingParam = formData.get('encoding') as string | null;
-          const encoding: FileEncoding = 
+          const encoding: FileEncoding =
             (encodingParam as FileEncoding) || 'utf-8';
-          
+
           // Validate encoding
           const validEncodings: FileEncoding[] = ['utf-8', 'utf-16', 'iso-8859-1'];
           if (!validEncodings.includes(encoding)) {
@@ -42,10 +42,13 @@ export const Route = createFileRoute('/api/upload')({
               { status: 400 }
             );
           }
-          
+
+          // Demo organization ID (for hackathon - in production, this would come from auth)
+          const DEMO_ORG_ID = '00000000-0000-0000-0000-000000000001';
+
           // Process file upload
-          const result = await processFileUpload(file, encoding);
-          
+          const result = await processFileUpload(file, DEMO_ORG_ID, encoding);
+
           if (!result.success) {
             return json(
               {
@@ -56,7 +59,7 @@ export const Route = createFileRoute('/api/upload')({
               { status: 400 }
             );
           }
-          
+
           // Return upload summary
           return json(
             {
@@ -69,7 +72,7 @@ export const Route = createFileRoute('/api/upload')({
           );
         } catch (error) {
           console.error('Upload processing error:', error);
-          
+
           return json(
             {
               error: error instanceof Error ? error.message : 'Internal server error',

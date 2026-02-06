@@ -23,7 +23,7 @@ describe('Dashboard Metrics - Property-Based Tests', () => {
       : 0;
   };
 
-  // Feature: lumina-mvp, Property 24: Dark funnel percentage calculation
+  // Feature: liwanag-mvp, Property 24: Dark funnel percentage calculation
   it('should calculate dark funnel percentage as (enriched / personal) * 100', () => {
     fc.assert(
       fc.property(
@@ -59,21 +59,21 @@ describe('Dashboard Metrics - Property-Based Tests', () => {
   it('should handle edge cases for dark funnel percentage', () => {
     // Zero personal emails
     expect(calculateDarkFunnelPercentage(0, 0)).toBe(0);
-    
+
     // All personal emails enriched
     expect(calculateDarkFunnelPercentage(100, 100)).toBe(100);
-    
+
     // No enriched emails
     expect(calculateDarkFunnelPercentage(0, 100)).toBe(0);
-    
+
     // Half enriched
     expect(calculateDarkFunnelPercentage(50, 100)).toBe(50);
-    
+
     // Fractional percentage
     expect(calculateDarkFunnelPercentage(1, 3)).toBe(33.33);
   });
 
-  // Feature: lumina-mvp, Property 25: Dashboard metrics completeness
+  // Feature: liwanag-mvp, Property 25: Dashboard metrics completeness
   it('should verify metrics structure has all required fields', () => {
     fc.assert(
       fc.property(
@@ -94,10 +94,10 @@ describe('Dashboard Metrics - Property-Based Tests', () => {
             mockData.totalSubscribers - personalEmailCount
           );
           const totalSubscribers = personalEmailCount + corporateEmailCount;
-          
+
           // Calculate enriched count as a percentage of personal emails
           const enrichedCount = Math.floor((personalEmailCount * mockData.enrichedRatio) / 100);
-          
+
           const darkFunnelPercentage = calculateDarkFunnelPercentage(enrichedCount, personalEmailCount);
 
           const metrics = {

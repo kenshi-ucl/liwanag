@@ -1,6 +1,34 @@
-# Lumina MVP - Dark Funnel Intelligence Engine
+# Liwanag - Dark Funnel Intelligence Engine
+
+> **Liwanag sa Madilim na Funnel** (Light in the Dark Funnel)
 
 A B2B lead intelligence platform that converts "dark funnel" signals (personal email subscriptions) into actionable enterprise pipeline through data enrichment and ICP scoring.
+
+## 🎯 The Problem
+
+50% of your future revenue is hiding in your newsletter list, disguised as @gmail.com addresses. When decision-makers subscribe using personal emails, traditional CRM tools fail to identify them. Your most engaged audience becomes invisible.
+
+## ✨ The Solution
+
+Liwanag uses FullEnrich's 15-provider waterfall to achieve 80%+ match rates on personal emails, automatically resolving them to professional identities with full company data and ICP scoring.
+
+## 🚀 Quick Demo
+
+**Already configured and ready to demo!**
+
+1. Start the server: `npm run dev`
+2. Open http://localhost:3000
+3. View the dashboard with pre-loaded demo data
+4. See 5 "Hidden Gems" - high-value leads discovered from personal emails
+
+**Demo data includes:**
+- 10 subscribers (8 enriched, 2 pending)
+- 5 hidden gems with ICP scores > 70
+- Sample CTOs, VPs, and Directors at enterprise companies
+
+📖 **Full demo guide:** See `DEMO_READY_CHECKLIST.md`
+
+---
 
 ## Project Setup Complete ✅
 
@@ -37,7 +65,7 @@ Copy `.env.example` to `.env` and configure the following variables:
 
 ```bash
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5432/lumina
+DATABASE_URL=postgresql://user:password@localhost:5432/liwanag
 
 # FullEnrich API
 FULLENRICH_API_KEY=your_api_key
@@ -147,4 +175,4 @@ All tests use property-based testing with fast-check to verify correctness prope
 
 ---
 
-For more information, see the spec documents in `.kiro/specs/lumina-mvp/`.
+For more information, see the spec documents in `.kiro/specs/liwanag-mvp/`.

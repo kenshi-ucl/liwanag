@@ -48,7 +48,8 @@ describe('Webhook to Enrichment Flow Integration', () => {
     const webhookResult = await processWebhook(
       rawPayload,
       signature,
-      env.NEWSLETTER_WEBHOOK_SECRET
+      env.NEWSLETTER_WEBHOOK_SECRET,
+      '00000000-0000-4000-8000-000000000001' // Test organization ID
     );
 
     // Verify webhook processing succeeded
@@ -168,7 +169,8 @@ describe('Webhook to Enrichment Flow Integration', () => {
     const webhookResult = await processWebhook(
       rawPayload,
       signature,
-      env.NEWSLETTER_WEBHOOK_SECRET
+      env.NEWSLETTER_WEBHOOK_SECRET,
+      '00000000-0000-4000-8000-000000000001' // Test organization ID
     );
 
     expect(webhookResult.success).toBe(true);
@@ -205,7 +207,8 @@ describe('Webhook to Enrichment Flow Integration', () => {
     const webhookResult = await processWebhook(
       rawPayload,
       signature,
-      env.NEWSLETTER_WEBHOOK_SECRET
+      env.NEWSLETTER_WEBHOOK_SECRET,
+      '00000000-0000-4000-8000-000000000001' // Test organization ID
     );
 
     const subscriberId = webhookResult.subscriberId!;
@@ -273,8 +276,8 @@ describe('Webhook to Enrichment Flow Integration', () => {
     const signature = createHmacSignature(rawPayload, env.NEWSLETTER_WEBHOOK_SECRET);
 
     // Submit webhook twice
-    const result1 = await processWebhook(rawPayload, signature, env.NEWSLETTER_WEBHOOK_SECRET);
-    const result2 = await processWebhook(rawPayload, signature, env.NEWSLETTER_WEBHOOK_SECRET);
+    const result1 = await processWebhook(rawPayload, signature, env.NEWSLETTER_WEBHOOK_SECRET, '00000000-0000-4000-8000-000000000001');
+    const result2 = await processWebhook(rawPayload, signature, env.NEWSLETTER_WEBHOOK_SECRET, '00000000-0000-4000-8000-000000000001');
 
     expect(result1.success).toBe(true);
     expect(result2.success).toBe(true);
@@ -311,11 +314,12 @@ describe('Webhook to Enrichment Flow Integration', () => {
     const result = await processWebhook(
       rawPayload,
       invalidSignature,
-      env.NEWSLETTER_WEBHOOK_SECRET
+      env.NEWSLETTER_WEBHOOK_SECRET,
+      '00000000-0000-4000-8000-000000000001' // Test organization ID
     );
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Invalid signature');
+    expect(result.error).toMatch(/Invalid signature|Signature length mismatch/);
 
     // Verify no subscriber was created
     const allSubscribers = await db

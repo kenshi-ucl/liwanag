@@ -9,9 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UploadRouteImport } from './routes/upload'
+import { Route as SigninRouteImport } from './routes/signin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
+import { Route as ApiOutreachRouteImport } from './routes/api/outreach'
 import { Route as ApiLeadsRouteImport } from './routes/api/leads'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
@@ -19,11 +22,23 @@ import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
 import { Route as ApiWebhooksSubscribeRouteImport } from './routes/api/webhooks/subscribe'
 import { Route as ApiLeadsSyncRouteImport } from './routes/api/leads.sync'
 import { Route as ApiDashboardMetricsRouteImport } from './routes/api/dashboard/metrics'
+import { Route as ApiAuthSignupRouteImport } from './routes/api/auth/signup'
+import { Route as ApiAuthSigninRouteImport } from './routes/api/auth/signin'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
+const UploadRoute = UploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -37,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
 const ApiUploadRoute = ApiUploadRouteImport.update({
   id: '/api/upload',
   path: '/api/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOutreachRoute = ApiOutreachRouteImport.update({
+  id: '/api/outreach',
+  path: '/api/outreach',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiLeadsRoute = ApiLeadsRouteImport.update({
@@ -74,6 +94,16 @@ const ApiDashboardMetricsRoute = ApiDashboardMetricsRouteImport.update({
   path: '/api/dashboard/metrics',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSignupRoute = ApiAuthSignupRouteImport.update({
+  id: '/api/auth/signup',
+  path: '/api/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSigninRoute = ApiAuthSigninRouteImport.update({
+  id: '/api/auth/signin',
+  path: '/api/auth/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
   id: '/demo/start/ssr/',
   path: '/demo/start/ssr/',
@@ -98,8 +128,13 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/signin': typeof SigninRoute
+  '/upload': typeof UploadRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
+  '/api/outreach': typeof ApiOutreachRoute
   '/api/upload': typeof ApiUploadRoute
+  '/api/auth/signin': typeof ApiAuthSigninRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
   '/api/leads/sync': typeof ApiLeadsSyncRoute
   '/api/webhooks/subscribe': typeof ApiWebhooksSubscribeRoute
@@ -114,8 +149,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/signin': typeof SigninRoute
+  '/upload': typeof UploadRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
+  '/api/outreach': typeof ApiOutreachRoute
   '/api/upload': typeof ApiUploadRoute
+  '/api/auth/signin': typeof ApiAuthSigninRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
   '/api/leads/sync': typeof ApiLeadsSyncRoute
   '/api/webhooks/subscribe': typeof ApiWebhooksSubscribeRoute
@@ -131,8 +171,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/signin': typeof SigninRoute
+  '/upload': typeof UploadRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
+  '/api/outreach': typeof ApiOutreachRoute
   '/api/upload': typeof ApiUploadRoute
+  '/api/auth/signin': typeof ApiAuthSigninRoute
+  '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
   '/api/leads/sync': typeof ApiLeadsSyncRoute
   '/api/webhooks/subscribe': typeof ApiWebhooksSubscribeRoute
@@ -149,8 +194,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/signin'
+    | '/upload'
     | '/api/leads'
+    | '/api/outreach'
     | '/api/upload'
+    | '/api/auth/signin'
+    | '/api/auth/signup'
     | '/api/dashboard/metrics'
     | '/api/leads/sync'
     | '/api/webhooks/subscribe'
@@ -165,8 +215,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard'
+    | '/signin'
+    | '/upload'
     | '/api/leads'
+    | '/api/outreach'
     | '/api/upload'
+    | '/api/auth/signin'
+    | '/api/auth/signup'
     | '/api/dashboard/metrics'
     | '/api/leads/sync'
     | '/api/webhooks/subscribe'
@@ -181,8 +236,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/signin'
+    | '/upload'
     | '/api/leads'
+    | '/api/outreach'
     | '/api/upload'
+    | '/api/auth/signin'
+    | '/api/auth/signup'
     | '/api/dashboard/metrics'
     | '/api/leads/sync'
     | '/api/webhooks/subscribe'
@@ -198,8 +258,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  SigninRoute: typeof SigninRoute
+  UploadRoute: typeof UploadRoute
   ApiLeadsRoute: typeof ApiLeadsRouteWithChildren
+  ApiOutreachRoute: typeof ApiOutreachRoute
   ApiUploadRoute: typeof ApiUploadRoute
+  ApiAuthSigninRoute: typeof ApiAuthSigninRoute
+  ApiAuthSignupRoute: typeof ApiAuthSignupRoute
   ApiDashboardMetricsRoute: typeof ApiDashboardMetricsRoute
   ApiWebhooksSubscribeRoute: typeof ApiWebhooksSubscribeRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
@@ -213,6 +278,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -232,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: '/api/upload'
       fullPath: '/api/upload'
       preLoaderRoute: typeof ApiUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/outreach': {
+      id: '/api/outreach'
+      path: '/api/outreach'
+      fullPath: '/api/outreach'
+      preLoaderRoute: typeof ApiOutreachRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/leads': {
@@ -283,6 +369,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDashboardMetricsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/signup': {
+      id: '/api/auth/signup'
+      path: '/api/auth/signup'
+      fullPath: '/api/auth/signup'
+      preLoaderRoute: typeof ApiAuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/signin': {
+      id: '/api/auth/signin'
+      path: '/api/auth/signin'
+      fullPath: '/api/auth/signin'
+      preLoaderRoute: typeof ApiAuthSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/start/ssr/': {
       id: '/demo/start/ssr/'
       path: '/demo/start/ssr'
@@ -329,8 +429,13 @@ const ApiLeadsRouteWithChildren = ApiLeadsRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  SigninRoute: SigninRoute,
+  UploadRoute: UploadRoute,
   ApiLeadsRoute: ApiLeadsRouteWithChildren,
+  ApiOutreachRoute: ApiOutreachRoute,
   ApiUploadRoute: ApiUploadRoute,
+  ApiAuthSigninRoute: ApiAuthSigninRoute,
+  ApiAuthSignupRoute: ApiAuthSignupRoute,
   ApiDashboardMetricsRoute: ApiDashboardMetricsRoute,
   ApiWebhooksSubscribeRoute: ApiWebhooksSubscribeRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,

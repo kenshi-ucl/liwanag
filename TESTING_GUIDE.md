@@ -2,7 +2,7 @@
 
 ## Overview
 
-Lumina uses property-based testing with [fast-check](https://github.com/dubzzz/fast-check) to validate correctness properties across all possible inputs. This ensures robust validation beyond traditional example-based testing.
+Liwanag uses property-based testing with [fast-check](https://github.com/dubzzz/fast-check) to validate correctness properties across all possible inputs. This ensures robust validation beyond traditional example-based testing.
 
 ## Test Categories
 
@@ -256,4 +256,4 @@ Tests run automatically in CI/CD pipelines. For database-dependent tests:
 
 ---
 
-For more information, see the spec documents in `.kiro/specs/lumina-mvp/`.
+For more information, see the spec documents in `.kiro/specs/liwanag-mvp/`.

@@ -1,6 +1,6 @@
 # Dashboard Module
 
-This module provides dashboard analytics, metrics calculation, and lead filtering functionality for the Lumina MVP.
+This module provides dashboard analytics, metrics calculation, and lead filtering functionality for the Liwanag MVP.
 
 ## Components
 

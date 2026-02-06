@@ -1,6 +1,6 @@
 # Integration Tests
 
-This directory contains integration tests that verify the complete end-to-end flows of the Lumina MVP application.
+This directory contains integration tests that verify the complete end-to-end flows of the Liwanag MVP application.
 
 ## Test Files
 

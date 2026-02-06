@@ -32,7 +32,7 @@ describe('Enrichment Status Aggregation - Property-Based Tests', () => {
     };
   };
 
-  // Feature: lumina-mvp, Property 15: Enrichment status aggregation
+  // Feature: liwanag-mvp, Property 15: Enrichment status aggregation
   it('should return accurate counts for pending, enriched, and failed jobs that sum to total', () => {
     fc.assert(
       fc.property(

@@ -54,11 +54,15 @@ export function deduplicateEmails(rows: ParsedRow[]): {
 /**
  * Processes a single row and upserts subscriber
  */
-async function processRow(row: ParsedRow, source: string = 'upload'): Promise<'created' | 'updated'> {
+async function processRow(
+  row: ParsedRow,
+  organizationId: string,
+  source: string = 'upload'
+): Promise<'created' | 'updated'> {
   const email = row.email.toLowerCase().trim();
   const emailType = classifyEmail(email);
   
-  // Check if subscriber already exists
+  // Check if subscriber already exists for this organization
   const existing = await db
     .select()
     .from(subscribers)
@@ -87,6 +91,7 @@ async function processRow(row: ParsedRow, source: string = 'upload'): Promise<'c
   } else {
     // Create new subscriber
     const [newSubscriber] = await db.insert(subscribers).values({
+      organizationId,
       email,
       emailType,
       source,
@@ -96,7 +101,7 @@ async function processRow(row: ParsedRow, source: string = 'upload'): Promise<'c
     // Trigger enrichment workflow for personal emails
     if (emailType === 'personal') {
       try {
-        await triggerEnrichmentForSubscriber(newSubscriber);
+        await triggerEnrichmentForSubscriber(newSubscriber, organizationId);
       } catch (error) {
         // Log error but don't fail the upload
         console.error('Failed to trigger enrichment workflow:', error);
@@ -112,6 +117,7 @@ async function processRow(row: ParsedRow, source: string = 'upload'): Promise<'c
  */
 async function processBatch(
   rows: ParsedRow[],
+  organizationId: string,
   source: string = 'upload'
 ): Promise<{ created: number; updated: number }> {
   let created = 0;
@@ -119,7 +125,7 @@ async function processBatch(
   
   for (const row of rows) {
     try {
-      const result = await processRow(row, source);
+      const result = await processRow(row, organizationId, source);
       if (result === 'created') {
         created++;
       } else {
@@ -141,6 +147,7 @@ async function processBatch(
  */
 export async function processBulkUpload(
   rows: ParsedRow[],
+  organizationId: string,
   config: Partial<BatchConfig> = {}
 ): Promise<UploadSummary> {
   const batchSize = config.batchSize || DEFAULT_BATCH_SIZE;
@@ -157,7 +164,7 @@ export async function processBulkUpload(
     const batch = uniqueRows.slice(i, i + batchSize);
     
     try {
-      const { created, updated } = await processBatch(batch);
+      const { created, updated } = await processBatch(batch, organizationId);
       totalCreated += created;
       totalUpdated += updated;
     } catch (error) {

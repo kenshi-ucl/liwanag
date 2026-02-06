@@ -1,6 +1,6 @@
 # Webhook Handler Implementation
 
-This module implements the data ingestion layer for webhook handling in the Lumina MVP.
+This module implements the data ingestion layer for webhook handling in the Liwanag MVP.
 
 ## Components
 

@@ -26,10 +26,16 @@ export interface FilteredLeadsResult {
  * Requirements: 8.1, 8.2, 8.3, 8.4, 8.5
  * 
  * @param filter - Filtering criteria
+ * @param organizationId - The organization ID for multi-tenant support
  * @returns Filtered leads and total count
  */
-export async function filterLeads(filter: LeadFilter): Promise<FilteredLeadsResult> {
+export async function filterLeads(filter: LeadFilter, organizationId?: string): Promise<FilteredLeadsResult> {
   const conditions: SQL[] = [];
+
+  // Add organization filter if provided
+  if (organizationId) {
+    conditions.push(eq(subscribers.organizationId, organizationId));
+  }
 
   // Filter by minimum ICP score (Requirement 8.1)
   if (filter.minICPScore !== undefined) {
@@ -74,20 +80,26 @@ export async function filterLeads(filter: LeadFilter): Promise<FilteredLeadsResu
  * Requirements: 7.4, 7.5
  * 
  * @param minScore - Minimum ICP score threshold (default: 70)
+ * @param organizationId - The organization ID for multi-tenant support
  * @returns Enriched subscribers with ICP score > threshold
  */
-export async function getHiddenGems(minScore: number = 70): Promise<Subscriber[]> {
+export async function getHiddenGems(minScore: number = 70, organizationId?: string): Promise<Subscriber[]> {
+  const conditions: SQL[] = [
+    isNotNull(subscribers.linkedinUrl), // Must be enriched
+    gte(subscribers.icpScore, minScore + 1) // ICP score > threshold (strictly greater)
+  ];
+  
+  // Add organization filter if provided
+  if (organizationId) {
+    conditions.push(eq(subscribers.organizationId, organizationId));
+  }
+  
   // Query enriched subscribers with ICP score > threshold
   // Enriched means they have linkedin_url populated (Requirement 7.4)
   const hiddenGems = await db
     .select()
     .from(subscribers)
-    .where(
-      and(
-        isNotNull(subscribers.linkedinUrl), // Must be enriched
-        gte(subscribers.icpScore, minScore + 1) // ICP score > threshold (strictly greater)
-      )
-    );
+    .where(and(...conditions));
 
   // All enrichment fields are included in the Subscriber type (Requirement 7.5)
   // Fields: linkedinUrl, jobTitle, companyName, companyDomain, headcount, industry

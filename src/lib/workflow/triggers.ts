@@ -13,20 +13,29 @@ import type { Subscriber } from '@/db/schema';
  * to automatically start the enrichment process for personal emails.
  * 
  * @param subscriber - The subscriber record
+ * @param organizationId - The organization ID for multi-tenant support
  * @returns Workflow ID if triggered, null if not applicable
  */
 export async function triggerEnrichmentForSubscriber(
-  subscriber: Subscriber
+  subscriber: Subscriber,
+  organizationId: string
 ): Promise<string | null> {
   // Only trigger for personal email subscribers
   if (subscriber.emailType !== 'personal') {
     return null;
   }
 
+  // Import job creator here to avoid circular dependency
+  const { createEnrichmentJob } = await import('@/lib/enrichment/job-creator');
+  
+  // Create enrichment job directly (subscriber already exists)
+  await createEnrichmentJob(subscriber.id, organizationId, 'personal');
+
   // Trigger the enrichment workflow
   const input: EnrichmentWorkflowInput = {
     subscriberId: subscriber.id,
     email: subscriber.email,
+    organizationId,
     triggerType: 'subscriber-created',
   };
 

@@ -15,14 +15,18 @@ const config = defineConfig({
     },
   },
   plugins: [
-    devtools(),
+    // devtools({
+    //   port: 42070, // Use a different port to avoid conflicts
+    // }),
     nitro(),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      routeFileIgnorePattern: '\\.test\\.(ts|tsx)$',
+    }),
     viteReact(),
   ],
   test: {

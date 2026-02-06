@@ -1,6 +1,6 @@
 # File Upload Module
 
-This module implements the bulk file upload functionality for the Lumina MVP, allowing users to upload CSV and Excel files containing subscriber data.
+This module implements the bulk file upload functionality for the Liwanag MVP, allowing users to upload CSV and Excel files containing subscriber data.
 
 ## Components
 

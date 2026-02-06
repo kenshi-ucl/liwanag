@@ -1,4 +1,3 @@
-import { useRouter } from '@tanstack/react-router';
 import { CheckCircle2, Loader2, ExternalLink, Linkedin } from 'lucide-react';
 import { useState } from 'react';
 
@@ -40,7 +39,6 @@ interface LeadTableProps {
  * Requirements: 9.1, 9.2, 9.3, 9.4
  */
 export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onRefresh }: LeadTableProps) {
-  const router = useRouter();
   const [syncingId, setSyncingId] = useState<string | null>(null);
 
   const handleSync = async (id: string) => {
@@ -78,7 +76,7 @@ export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onR
   }
 
   const unsyncedLeads = leads.filter(lead => !lead.syncedToCRM);
-  const allUnsyncedSelected = unsyncedLeads.length > 0 && 
+  const allUnsyncedSelected = unsyncedLeads.length > 0 &&
     unsyncedLeads.every(lead => selectedLeads.has(lead.id));
 
   return (
@@ -138,10 +136,14 @@ export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onR
                   />
                 </td>
                 <td className="px-4 py-3">
-                  <div className="text-sm font-medium text-slate-900">{lead.email}</div>
-                  {lead.source && (
-                    <div className="text-xs text-slate-500">{lead.source}</div>
-                  )}
+                  <div className="group cursor-pointer">
+                    <div className={`text-sm font-medium text-slate-900`}>
+                      {lead.email}
+                    </div>
+                    <div className="text-xs text-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {lead.source && <span>{lead.source}</span>}
+                    </div>
+                  </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="text-sm text-slate-900">
@@ -169,13 +171,12 @@ export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onR
                 <td className="px-4 py-3 text-center">
                   {lead.icpScore !== null ? (
                     <span
-                      className={`inline-flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm ${
-                        lead.icpScore >= 70
-                          ? 'bg-green-100 text-green-700'
-                          : lead.icpScore >= 40
+                      className={`inline-flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm ${lead.icpScore >= 70
+                        ? 'bg-green-100 text-green-700'
+                        : lead.icpScore >= 40
                           ? 'bg-amber-100 text-amber-700'
                           : 'bg-slate-100 text-slate-700'
-                      }`}
+                        }`}
                     >
                       {lead.icpScore}
                     </span>

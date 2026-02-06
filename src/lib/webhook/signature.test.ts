@@ -4,7 +4,7 @@ import { createHmac } from 'crypto';
 import { validateWebhookSignature } from './signature';
 
 describe('Webhook Signature Validation', () => {
-  // Feature: lumina-mvp, Property 1: Webhook signature validation
+  // Feature: liwanag-mvp, Property 1: Webhook signature validation
   // Validates: Requirements 1.1
   it('should return true if and only if the signature is a valid HMAC-SHA256 hash', () => {
     fc.assert(
@@ -16,12 +16,12 @@ describe('Webhook Signature Validation', () => {
           const hmac = createHmac('sha256', secret);
           hmac.update(payload);
           const validSignature = hmac.digest('hex');
-          
+
           // Test with valid signature
           const validResult = validateWebhookSignature(payload, validSignature, secret);
           expect(validResult.isValid).toBe(true);
           expect(validResult.error).toBeUndefined();
-          
+
           // Test with invalid signature (modified)
           const invalidSignature = validSignature.slice(0, -1) + 'x';
           const invalidResult = validateWebhookSignature(payload, invalidSignature, secret);
@@ -41,12 +41,12 @@ describe('Webhook Signature Validation', () => {
         fc.string({ minLength: 1 }), // secret2
         (payload, secret1, secret2) => {
           fc.pre(secret1 !== secret2); // Only test when secrets are different
-          
+
           // Generate signature with secret1
           const hmac = createHmac('sha256', secret1);
           hmac.update(payload);
           const signature = hmac.digest('hex');
-          
+
           // Validate with secret2 should fail
           const result = validateWebhookSignature(payload, signature, secret2);
           expect(result.isValid).toBe(false);
@@ -65,7 +65,7 @@ describe('Webhook Signature Validation', () => {
           const hmac = createHmac('sha256', secret);
           hmac.update(payload);
           const signature = hmac.digest('hex');
-          
+
           const result = validateWebhookSignature(payload, signature, secret);
           expect(result.isValid).toBe(true);
         }

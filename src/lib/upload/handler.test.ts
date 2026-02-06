@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { processFileUpload } from './handler';
 
+// Test organization ID
+const TEST_ORG_ID = '00000000-0000-4000-8000-000000000001';
+
 describe('Upload Handler', () => {
   it('should reject when no file is provided', async () => {
-    const result = await processFileUpload(null as any);
+    const result = await processFileUpload(null as any, TEST_ORG_ID);
     
     expect(result.success).toBe(false);
     expect(result.error).toBe('No file provided');
@@ -15,7 +18,7 @@ describe('Upload Handler', () => {
     const blob = new Blob([largeContent], { type: 'text/csv' });
     const file = new File([blob], 'large.csv', { type: 'text/csv' });
     
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
     
     expect(result.success).toBe(false);
     expect(result.error).toContain('exceeds maximum limit');
@@ -25,7 +28,7 @@ describe('Upload Handler', () => {
     const blob = new Blob(['test'], { type: 'text/plain' });
     const file = new File([blob], 'test.txt', { type: 'text/plain' });
     
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
     
     expect(result.success).toBe(false);
     expect(result.error).toContain('Unsupported file format');
@@ -36,7 +39,7 @@ describe('Upload Handler', () => {
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const file = new File([blob], 'test.csv', { type: 'text/csv' });
     
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
     
     expect(result.success).toBe(false);
     expect(result.error).toContain('Missing required column: email');
@@ -47,7 +50,7 @@ describe('Upload Handler', () => {
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const file = new File([blob], 'test.csv', { type: 'text/csv' });
     
-    const result = await processFileUpload(file);
+    const result = await processFileUpload(file, TEST_ORG_ID);
     
     // Note: This will fail without a real database connection
     // but validates the parsing logic works

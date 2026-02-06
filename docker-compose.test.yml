@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres-test:
     image: postgres:16-alpine
-    container_name: lumina-test-db
+    container_name: liwanag-test-db
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test

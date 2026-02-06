@@ -16,7 +16,7 @@ import {
 } from './json';
 
 describe('JSON Serialization Properties', () => {
-  // Feature: lumina-mvp, Property 36: JSON serialization round-trip
+  // Feature: liwanag-mvp, Property 36: JSON serialization round-trip
   // Validates: Requirements 13.3
   describe('Property 36: JSON serialization round-trip', () => {
     it('should preserve primitive values through serialize/deserialize cycle', () => {
@@ -135,7 +135,7 @@ describe('JSON Serialization Properties', () => {
     });
   });
 
-  // Feature: lumina-mvp, Property 38: Optional field handling
+  // Feature: liwanag-mvp, Property 38: Optional field handling
   // Validates: Requirements 13.5
   describe('Property 38: Optional field handling', () => {
     it('should handle objects with missing optional fields during deserialization', () => {
@@ -151,13 +151,13 @@ describe('JSON Serialization Properties', () => {
           (value) => {
             // Serialize (undefined fields will be omitted)
             const serialized = serialize(value);
-            
+
             // Deserialize should succeed even with missing fields
             const deserialized = deserialize<typeof value>(serialized);
-            
+
             // Required fields should be present
             expect(deserialized.email).toBe(value.email);
-            
+
             // Optional fields should match (undefined becomes absent in JSON)
             if (value.linkedinUrl !== undefined) {
               expect(deserialized.linkedinUrl).toBe(value.linkedinUrl);
@@ -188,7 +188,7 @@ describe('JSON Serialization Properties', () => {
           (value) => {
             const serialized = serialize(value);
             const deserialized = deserialize<typeof value>(serialized);
-            
+
             // Null values should be preserved
             expect(deserialized.linkedinUrl).toBe(value.linkedinUrl);
             expect(deserialized.jobTitle).toBe(value.jobTitle);
@@ -214,11 +214,11 @@ describe('JSON Serialization Properties', () => {
           (value) => {
             const serialized = serialize(value);
             const deserialized = deserialize<typeof value>(serialized);
-            
+
             // Required fields must be present
             expect(deserialized.email).toBe(value.email);
             expect(deserialized.creditsUsed).toBe(value.creditsUsed);
-            
+
             // Optional fields should be handled gracefully
             // (undefined in input becomes absent in JSON, which becomes undefined in output)
           }
@@ -238,17 +238,17 @@ describe('JSON Serialization Properties', () => {
           (value) => {
             const serialized = serializeWithOptionals(value);
             const parsed = JSON.parse(serialized);
-            
+
             // Required field should always be present
             expect(parsed.required).toBe(value.required);
-            
+
             // Undefined fields should be removed
             if (value.optional1 === undefined) {
               expect(parsed).not.toHaveProperty('optional1');
             } else {
               expect(parsed.optional1).toBe(value.optional1);
             }
-            
+
             if (value.optional2 === undefined) {
               expect(parsed).not.toHaveProperty('optional2');
             } else {
@@ -271,12 +271,12 @@ describe('JSON Serialization Properties', () => {
           (value, defaultStatus) => {
             // Serialize without the optional field sometimes
             const serialized = serialize({ email: value.email });
-            
+
             // Deserialize with defaults
             const deserialized = deserializeWithOptionals(serialized, {
               status: defaultStatus,
             });
-            
+
             // Should have the default value
             expect(deserialized.email).toBe(value.email);
             expect(deserialized.status).toBe(defaultStatus);
@@ -330,7 +330,7 @@ describe('JSON Serialization Properties', () => {
     it('should throw SerializationError for circular references', () => {
       const circular: any = { a: 1 };
       circular.self = circular;
-      
+
       expect(() => serialize(circular)).toThrow(SerializationError);
     });
 

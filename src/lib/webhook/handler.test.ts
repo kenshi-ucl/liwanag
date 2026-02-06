@@ -29,7 +29,7 @@ describe.skipIf(skipDbTests)('Webhook Processing', () => {
     }
   });
 
-  // Feature: lumina-mvp, Property 2: Raw payload persistence
+  // Feature: liwanag-mvp, Property 2: Raw payload persistence
   // Validates: Requirements 1.3
   it('should store raw payload in JSONB format after processing', async () => {
     await fc.assert(
@@ -73,7 +73,7 @@ describe.skipIf(skipDbTests)('Webhook Processing', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 4: Subscriber upsert idempotency
+  // Feature: liwanag-mvp, Property 4: Subscriber upsert idempotency
   // Validates: Requirements 1.5
   it('should result in exactly one subscriber record for duplicate emails', async () => {
     await fc.assert(
@@ -125,7 +125,7 @@ describe.skipIf(skipDbTests)('Webhook Processing', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 5: Successful webhook response format
+  // Feature: liwanag-mvp, Property 5: Successful webhook response format
   // Validates: Requirements 1.6
   it('should return 200 with valid UUID subscriber ID on success', async () => {
     await fc.assert(

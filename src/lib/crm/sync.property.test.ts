@@ -62,7 +62,7 @@ describe('CRM Sync - Property-Based Tests', () => {
     };
   };
 
-  // Feature: lumina-mvp, Property 32: Sync status persistence
+  // Feature: liwanag-mvp, Property 32: Sync status persistence
   it('should persist sync status with timestamp for any subscriber', () => {
     /**
      * **Validates: Requirements 9.1**
@@ -137,7 +137,7 @@ describe('CRM Sync - Property-Based Tests', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 33: Sync idempotency
+  // Feature: liwanag-mvp, Property 33: Sync idempotency
   it('should prevent duplicate sync actions for already-synced subscribers', () => {
     /**
      * **Validates: Requirements 9.2**
@@ -204,7 +204,7 @@ describe('CRM Sync - Property-Based Tests', () => {
     );
   });
 
-  // Feature: lumina-mvp, Property 34: Bulk sync operations
+  // Feature: liwanag-mvp, Property 34: Bulk sync operations
   it('should sync multiple subscribers with accurate counts', () => {
     /**
      * **Validates: Requirements 9.4**
