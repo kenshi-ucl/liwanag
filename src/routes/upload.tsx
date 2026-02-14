@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState, useRef } from 'react';
 import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, ArrowLeft, Loader2, UserPlus, FileUp } from 'lucide-react';
+import { EnrichmentProgress } from '@/components/EnrichmentProgress';
 
 export const Route = createFileRoute('/upload')({
   component: UploadPage,
@@ -78,6 +79,7 @@ function ManualEntryTab() {
   const [email, setEmail] = useState('');
   const [source, setSource] = useState('Newsletter');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,6 +100,7 @@ function ManualEntryTab() {
 
     setIsSubmitting(true);
     setError(null);
+    setShowProgress(true);
 
     try {
       // Create a simple CSV content and upload it
@@ -117,22 +120,47 @@ function ManualEntryTab() {
       const data = await response.json();
 
       if (!response.ok) {
+        setShowProgress(false);
         throw new Error(data.error || 'Failed to add subscriber');
       }
 
       if (data.duplicatesSkipped > 0) {
+        setShowProgress(false);
         setError('This email already exists in the system');
-      } else {
-        setSuccess(true);
-        setEmail('');
-        setTimeout(() => setSuccess(false), 3000);
       }
+      // Keep showing progress animation - it will complete and show success
     } catch (err) {
+      setShowProgress(false);
       setError(err instanceof Error ? err.message : 'Failed to add subscriber');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const handleProgressComplete = () => {
+    setShowProgress(false);
+    setSuccess(true);
+    setEmail('');
+    setTimeout(() => setSuccess(false), 3000);
+  };
+
+  // Show enrichment progress animation
+  if (showProgress) {
+    return (
+      <div className="max-w-md mx-auto">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-900">Enriching Subscriber</h2>
+          <p className="text-slate-600 mt-1">
+            Processing {email} through the dark funnel intelligence engine
+          </p>
+        </div>
+        <EnrichmentProgress onComplete={handleProgressComplete} />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -318,6 +346,26 @@ function FileUploadTab() {
       setIsUploading(false);
     }
   };
+
+  // Show loading state during upload
+  if (isUploading) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Loader2 className="w-8 h-8 text-cyan-600 animate-spin" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Processing Upload</h2>
+        <p className="text-slate-600">
+          Importing subscribers and preparing enrichment...
+        </p>
+        <div className="mt-6 max-w-md mx-auto">
+          <div className="bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div className="bg-cyan-600 h-full animate-pulse" style={{ width: '60%' }}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const resetUpload = () => {
     setSelectedFile(null);

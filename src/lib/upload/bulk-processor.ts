@@ -5,6 +5,7 @@ import type { ParsedRow } from './file-parser';
 import { eq } from 'drizzle-orm';
 import { triggerEnrichmentForSubscriber } from '../workflow/triggers';
 import { nowUTC, toUTCString } from '../../db/timestamp-utils';
+import { shouldUseMockEnrichment, mockEnrichSubscriber } from '../enrichment/mock-enricher';
 
 /**
  * Upload summary result
@@ -98,14 +99,27 @@ async function processRow(
       rawPayload,
     }).returning();
     
-    // Trigger enrichment workflow for personal emails
-    if (emailType === 'personal') {
-      try {
+    // Trigger enrichment workflow for ALL emails (personal and corporate)
+    try {
+      // Check if we should use mock enrichment (for demo/dev)
+      if (shouldUseMockEnrichment()) {
+        // Use mock enrichment immediately for demo purposes
+        setTimeout(async () => {
+          try {
+            await mockEnrichSubscriber(newSubscriber.id);
+            console.log(`Mock enrichment completed for ${email}`);
+          } catch (error) {
+            console.error('Mock enrichment failed:', error);
+          }
+        }, 2000); // 2 second delay to simulate API processing
+      } else {
+        // Use real enrichment workflow for all emails
+        console.log(`Triggering real enrichment for ${emailType} email: ${email}`);
         await triggerEnrichmentForSubscriber(newSubscriber, organizationId);
-      } catch (error) {
-        // Log error but don't fail the upload
-        console.error('Failed to trigger enrichment workflow:', error);
       }
+    } catch (error) {
+      // Log error but don't fail the upload
+      console.error('Failed to trigger enrichment workflow:', error);
     }
     
     return 'created';

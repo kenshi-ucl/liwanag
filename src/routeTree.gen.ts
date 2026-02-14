@@ -20,14 +20,18 @@ import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.se
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
 import { Route as ApiWebhooksSubscribeRouteImport } from './routes/api/webhooks/subscribe'
+import { Route as ApiWebhooksEnrichmentRouteImport } from './routes/api/webhooks/enrichment'
 import { Route as ApiLeadsSyncRouteImport } from './routes/api/leads.sync'
+import { Route as ApiLeadsDeleteRouteImport } from './routes/api/leads/delete'
 import { Route as ApiDashboardMetricsRouteImport } from './routes/api/dashboard/metrics'
 import { Route as ApiAuthSignupRouteImport } from './routes/api/auth/signup'
 import { Route as ApiAuthSigninRouteImport } from './routes/api/auth/signin'
+import { Route as ApiAuthGithubRouteImport } from './routes/api/auth/github'
 import { Route as DemoStartSsrIndexRouteImport } from './routes/demo/start.ssr.index'
 import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr.spa-mode'
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
+import { Route as ApiAuthGithubCallbackRouteImport } from './routes/api/auth/github/callback'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -84,9 +88,19 @@ const ApiWebhooksSubscribeRoute = ApiWebhooksSubscribeRouteImport.update({
   path: '/api/webhooks/subscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWebhooksEnrichmentRoute = ApiWebhooksEnrichmentRouteImport.update({
+  id: '/api/webhooks/enrichment',
+  path: '/api/webhooks/enrichment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeadsSyncRoute = ApiLeadsSyncRouteImport.update({
   id: '/sync',
   path: '/sync',
+  getParentRoute: () => ApiLeadsRoute,
+} as any)
+const ApiLeadsDeleteRoute = ApiLeadsDeleteRouteImport.update({
+  id: '/delete',
+  path: '/delete',
   getParentRoute: () => ApiLeadsRoute,
 } as any)
 const ApiDashboardMetricsRoute = ApiDashboardMetricsRouteImport.update({
@@ -102,6 +116,11 @@ const ApiAuthSignupRoute = ApiAuthSignupRouteImport.update({
 const ApiAuthSigninRoute = ApiAuthSigninRouteImport.update({
   id: '/api/auth/signin',
   path: '/api/auth/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthGithubRoute = ApiAuthGithubRouteImport.update({
+  id: '/api/auth/github',
+  path: '/api/auth/github',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoStartSsrIndexRoute = DemoStartSsrIndexRouteImport.update({
@@ -124,6 +143,11 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
   path: '/demo/start/ssr/data-only',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthGithubCallbackRoute = ApiAuthGithubCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => ApiAuthGithubRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -133,14 +157,18 @@ export interface FileRoutesByFullPath {
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/outreach': typeof ApiOutreachRoute
   '/api/upload': typeof ApiUploadRoute
+  '/api/auth/github': typeof ApiAuthGithubRouteWithChildren
   '/api/auth/signin': typeof ApiAuthSigninRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
+  '/api/leads/delete': typeof ApiLeadsDeleteRoute
   '/api/leads/sync': typeof ApiLeadsSyncRoute
+  '/api/webhooks/enrichment': typeof ApiWebhooksEnrichmentRoute
   '/api/webhooks/subscribe': typeof ApiWebhooksSubscribeRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/api/auth/github/callback': typeof ApiAuthGithubCallbackRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -154,14 +182,18 @@ export interface FileRoutesByTo {
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/outreach': typeof ApiOutreachRoute
   '/api/upload': typeof ApiUploadRoute
+  '/api/auth/github': typeof ApiAuthGithubRouteWithChildren
   '/api/auth/signin': typeof ApiAuthSigninRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
+  '/api/leads/delete': typeof ApiLeadsDeleteRoute
   '/api/leads/sync': typeof ApiLeadsSyncRoute
+  '/api/webhooks/enrichment': typeof ApiWebhooksEnrichmentRoute
   '/api/webhooks/subscribe': typeof ApiWebhooksSubscribeRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/api/auth/github/callback': typeof ApiAuthGithubCallbackRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -176,14 +208,18 @@ export interface FileRoutesById {
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/outreach': typeof ApiOutreachRoute
   '/api/upload': typeof ApiUploadRoute
+  '/api/auth/github': typeof ApiAuthGithubRouteWithChildren
   '/api/auth/signin': typeof ApiAuthSigninRoute
   '/api/auth/signup': typeof ApiAuthSignupRoute
   '/api/dashboard/metrics': typeof ApiDashboardMetricsRoute
+  '/api/leads/delete': typeof ApiLeadsDeleteRoute
   '/api/leads/sync': typeof ApiLeadsSyncRoute
+  '/api/webhooks/enrichment': typeof ApiWebhooksEnrichmentRoute
   '/api/webhooks/subscribe': typeof ApiWebhooksSubscribeRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
+  '/api/auth/github/callback': typeof ApiAuthGithubCallbackRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -199,14 +235,18 @@ export interface FileRouteTypes {
     | '/api/leads'
     | '/api/outreach'
     | '/api/upload'
+    | '/api/auth/github'
     | '/api/auth/signin'
     | '/api/auth/signup'
     | '/api/dashboard/metrics'
+    | '/api/leads/delete'
     | '/api/leads/sync'
+    | '/api/webhooks/enrichment'
     | '/api/webhooks/subscribe'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/api/auth/github/callback'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -220,14 +260,18 @@ export interface FileRouteTypes {
     | '/api/leads'
     | '/api/outreach'
     | '/api/upload'
+    | '/api/auth/github'
     | '/api/auth/signin'
     | '/api/auth/signup'
     | '/api/dashboard/metrics'
+    | '/api/leads/delete'
     | '/api/leads/sync'
+    | '/api/webhooks/enrichment'
     | '/api/webhooks/subscribe'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/api/auth/github/callback'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -241,14 +285,18 @@ export interface FileRouteTypes {
     | '/api/leads'
     | '/api/outreach'
     | '/api/upload'
+    | '/api/auth/github'
     | '/api/auth/signin'
     | '/api/auth/signup'
     | '/api/dashboard/metrics'
+    | '/api/leads/delete'
     | '/api/leads/sync'
+    | '/api/webhooks/enrichment'
     | '/api/webhooks/subscribe'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
+    | '/api/auth/github/callback'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -263,9 +311,11 @@ export interface RootRouteChildren {
   ApiLeadsRoute: typeof ApiLeadsRouteWithChildren
   ApiOutreachRoute: typeof ApiOutreachRoute
   ApiUploadRoute: typeof ApiUploadRoute
+  ApiAuthGithubRoute: typeof ApiAuthGithubRouteWithChildren
   ApiAuthSigninRoute: typeof ApiAuthSigninRoute
   ApiAuthSignupRoute: typeof ApiAuthSignupRoute
   ApiDashboardMetricsRoute: typeof ApiDashboardMetricsRoute
+  ApiWebhooksEnrichmentRoute: typeof ApiWebhooksEnrichmentRoute
   ApiWebhooksSubscribeRoute: typeof ApiWebhooksSubscribeRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
@@ -355,11 +405,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWebhooksSubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhooks/enrichment': {
+      id: '/api/webhooks/enrichment'
+      path: '/api/webhooks/enrichment'
+      fullPath: '/api/webhooks/enrichment'
+      preLoaderRoute: typeof ApiWebhooksEnrichmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/leads/sync': {
       id: '/api/leads/sync'
       path: '/sync'
       fullPath: '/api/leads/sync'
       preLoaderRoute: typeof ApiLeadsSyncRouteImport
+      parentRoute: typeof ApiLeadsRoute
+    }
+    '/api/leads/delete': {
+      id: '/api/leads/delete'
+      path: '/delete'
+      fullPath: '/api/leads/delete'
+      preLoaderRoute: typeof ApiLeadsDeleteRouteImport
       parentRoute: typeof ApiLeadsRoute
     }
     '/api/dashboard/metrics': {
@@ -381,6 +445,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/signin'
       fullPath: '/api/auth/signin'
       preLoaderRoute: typeof ApiAuthSigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/github': {
+      id: '/api/auth/github'
+      path: '/api/auth/github'
+      fullPath: '/api/auth/github'
+      preLoaderRoute: typeof ApiAuthGithubRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/start/ssr/': {
@@ -411,19 +482,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoStartSsrDataOnlyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/github/callback': {
+      id: '/api/auth/github/callback'
+      path: '/callback'
+      fullPath: '/api/auth/github/callback'
+      preLoaderRoute: typeof ApiAuthGithubCallbackRouteImport
+      parentRoute: typeof ApiAuthGithubRoute
+    }
   }
 }
 
 interface ApiLeadsRouteChildren {
+  ApiLeadsDeleteRoute: typeof ApiLeadsDeleteRoute
   ApiLeadsSyncRoute: typeof ApiLeadsSyncRoute
 }
 
 const ApiLeadsRouteChildren: ApiLeadsRouteChildren = {
+  ApiLeadsDeleteRoute: ApiLeadsDeleteRoute,
   ApiLeadsSyncRoute: ApiLeadsSyncRoute,
 }
 
 const ApiLeadsRouteWithChildren = ApiLeadsRoute._addFileChildren(
   ApiLeadsRouteChildren,
+)
+
+interface ApiAuthGithubRouteChildren {
+  ApiAuthGithubCallbackRoute: typeof ApiAuthGithubCallbackRoute
+}
+
+const ApiAuthGithubRouteChildren: ApiAuthGithubRouteChildren = {
+  ApiAuthGithubCallbackRoute: ApiAuthGithubCallbackRoute,
+}
+
+const ApiAuthGithubRouteWithChildren = ApiAuthGithubRoute._addFileChildren(
+  ApiAuthGithubRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -434,9 +526,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiLeadsRoute: ApiLeadsRouteWithChildren,
   ApiOutreachRoute: ApiOutreachRoute,
   ApiUploadRoute: ApiUploadRoute,
+  ApiAuthGithubRoute: ApiAuthGithubRouteWithChildren,
   ApiAuthSigninRoute: ApiAuthSigninRoute,
   ApiAuthSignupRoute: ApiAuthSignupRoute,
   ApiDashboardMetricsRoute: ApiDashboardMetricsRoute,
+  ApiWebhooksEnrichmentRoute: ApiWebhooksEnrichmentRoute,
   ApiWebhooksSubscribeRoute: ApiWebhooksSubscribeRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,

@@ -7,10 +7,10 @@ import { enrichmentWorkflow, type EnrichmentWorkflowInput } from './enrichment-w
 import type { Subscriber } from '@/db/schema';
 
 /**
- * Trigger enrichment workflow when a personal email subscriber is created
+ * Trigger enrichment workflow when a subscriber is created
  * 
  * This function should be called after a subscriber is created or updated
- * to automatically start the enrichment process for personal emails.
+ * to automatically start the enrichment process for all emails.
  * 
  * @param subscriber - The subscriber record
  * @param organizationId - The organization ID for multi-tenant support
@@ -20,16 +20,14 @@ export async function triggerEnrichmentForSubscriber(
   subscriber: Subscriber,
   organizationId: string
 ): Promise<string | null> {
-  // Only trigger for personal email subscribers
-  if (subscriber.emailType !== 'personal') {
-    return null;
-  }
-
   // Import job creator here to avoid circular dependency
   const { createEnrichmentJob } = await import('@/lib/enrichment/job-creator');
   
-  // Create enrichment job directly (subscriber already exists)
-  await createEnrichmentJob(subscriber.id, organizationId, 'personal');
+  // Determine email type for credit estimation
+  const emailType = subscriber.emailType === 'personal' ? 'personal' : 'corporate';
+  
+  // Create enrichment job for all email types
+  await createEnrichmentJob(subscriber.id, organizationId, emailType);
 
   // Trigger the enrichment workflow
   const input: EnrichmentWorkflowInput = {

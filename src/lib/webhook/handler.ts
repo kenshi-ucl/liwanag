@@ -65,8 +65,9 @@ export async function processWebhook(
     // Step 4: Upsert subscriber (insert or update if exists)
     const result = await upsertSubscriber(payload, emailType, organizationId);
 
-    // Step 5: Trigger enrichment workflow for personal emails
-    if (result.status === 'created' && emailType === 'personal') {
+    // Step 5: Trigger enrichment workflow for CORPORATE emails only
+    // Personal emails (gmail, yahoo, etc.) are NOT enriched
+    if (result.status === 'created' && emailType === 'corporate') {
       try {
         await triggerEnrichmentForSubscriber(result, organizationId);
       } catch (error) {

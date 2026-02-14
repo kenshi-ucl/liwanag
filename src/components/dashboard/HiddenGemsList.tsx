@@ -1,4 +1,4 @@
-import { Loader2, Linkedin, Building2, Users as UsersIcon, Briefcase, CheckCircle2, ExternalLink, Sparkles, Copy, X, DollarSign } from 'lucide-react';
+import { Loader2, Linkedin, Building2, Users as UsersIcon, Briefcase, CheckCircle2, ExternalLink, Sparkles, Copy, X, DollarSign, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 interface Subscriber {
@@ -28,7 +28,9 @@ interface GeneratedOutreach {
 interface LeadCardProps {
   lead: Subscriber;
   onSync: (id: string) => void;
+  onDelete: (id: string) => void;
   isSyncing: boolean;
+  isDeleting: boolean;
 }
 
 /**
@@ -54,11 +56,11 @@ function formatCurrency(value: number): string {
   return `$${value}`;
 }
 
-function LeadCard({ lead, onSync, isSyncing }: LeadCardProps) {
-  const [isEmailRevealed, setIsEmailRevealed] = useState(false);
+function LeadCard({ lead, onSync, onDelete, isSyncing, isDeleting }: LeadCardProps) {
   const [isGeneratingOutreach, setIsGeneratingOutreach] = useState(false);
   const [outreach, setOutreach] = useState<GeneratedOutreach | null>(null);
   const [showOutreachModal, setShowOutreachModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const pipelineValue = estimatePipelineValue(lead.headcount);
@@ -242,6 +244,38 @@ function LeadCard({ lead, onSync, isSyncing }: LeadCardProps) {
               )}
             </button>
           )}
+
+          {/* Delete Button */}
+          {showDeleteConfirm ? (
+            <div className="flex gap-2">
+              <button
+                onClick={() => onDelete(lead.id)}
+                disabled={isDeleting}
+                className="px-3 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-300 text-white text-xs rounded-lg font-medium transition-colors"
+              >
+                {isDeleting ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  'Confirm'
+                )}
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs rounded-lg font-medium transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Delete lead"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -321,6 +355,7 @@ function LeadCard({ lead, onSync, isSyncing }: LeadCardProps) {
  */
 export function HiddenGemsList() {
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [data, setData] = useState<{ leads: Subscriber[]; totalCount: number } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -369,6 +404,31 @@ export function HiddenGemsList() {
       console.error('Sync error:', error);
     } finally {
       setSyncingId(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      const response = await fetch('/api/leads/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ subscriberIds: [id] }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete lead');
+      }
+
+      // Refetch data after successful delete
+      await fetchHiddenGems();
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete lead. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -428,7 +488,9 @@ export function HiddenGemsList() {
             key={lead.id}
             lead={lead}
             onSync={handleSync}
+            onDelete={handleDelete}
             isSyncing={syncingId === lead.id}
+            isDeleting={deletingId === lead.id}
           />
         ))}
       </div>

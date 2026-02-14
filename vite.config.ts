@@ -9,6 +9,13 @@ import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 
 const config = defineConfig({
+  server: {
+    allowedHosts: [
+      '034d-216-247-37-109.ngrok-free.app',
+      '.ngrok-free.app', // Allow all ngrok free domains
+      '.ngrok.io', // Allow all ngrok paid domains
+    ],
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -24,9 +31,7 @@ const config = defineConfig({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
-    tanstackStart({
-      routeFileIgnorePattern: '\\.test\\.(ts|tsx)$',
-    }),
+    tanstackStart(),
     viteReact(),
   ],
   test: {

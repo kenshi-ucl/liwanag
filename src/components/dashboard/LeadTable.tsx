@@ -1,4 +1,4 @@
-import { CheckCircle2, Loader2, ExternalLink, Linkedin } from 'lucide-react';
+import { CheckCircle2, Loader2, ExternalLink, Linkedin, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface Subscriber {
@@ -40,6 +40,8 @@ interface LeadTableProps {
  */
 export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onRefresh }: LeadTableProps) {
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
   const handleSync = async (id: string) => {
     setSyncingId(id);
@@ -61,6 +63,31 @@ export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onR
       console.error('Sync error:', error);
     } finally {
       setSyncingId(null);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      const response = await fetch('/api/leads/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ subscriberIds: [id] }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete lead');
+      }
+
+      await onRefresh();
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Failed to delete lead. Please try again.');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -120,6 +147,9 @@ export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onR
               </th>
               <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
                 Action
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                Delete
               </th>
             </tr>
           </thead>
@@ -228,6 +258,38 @@ export function LeadTable({ leads, selectedLeads, onSelectAll, onSelectLead, onR
                       ) : (
                         'Sync'
                       )}
+                    </button>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  {showDeleteConfirm === lead.id ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => handleDelete(lead.id)}
+                        disabled={deletingId === lead.id}
+                        className="px-2 py-1 bg-red-600 hover:bg-red-700 disabled:bg-slate-300 text-white rounded text-xs font-medium transition-colors"
+                      >
+                        {deletingId === lead.id ? (
+                          <Loader2 className="w-3 h-3 animate-spin inline" />
+                        ) : (
+                          'Confirm'
+                        )}
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(null)}
+                        disabled={deletingId === lead.id}
+                        className="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-medium transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowDeleteConfirm(lead.id)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded transition-colors"
+                      title="Delete lead"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   )}
                 </td>

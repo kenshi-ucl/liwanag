@@ -69,7 +69,44 @@ export const Route = createFileRoute('/dashboard')({
     ]);
     return { metrics, hiddenGems };
   },
+  pendingComponent: DashboardLoading,
 });
+
+function DashboardLoading() {
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center gap-3">
+            <BarChart3 className="w-8 h-8 text-cyan-600" />
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Dark Funnel Intelligence
+              </h1>
+              <p className="text-sm text-slate-600">
+                Uncover hidden high-value leads from personal email subscriptions
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Loading Content */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <BarChart3 className="w-8 h-8 text-cyan-600 animate-pulse" />
+            </div>
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">Loading Dashboard</h2>
+            <p className="text-slate-600">Fetching your dark funnel intelligence...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Dashboard() {
   return (

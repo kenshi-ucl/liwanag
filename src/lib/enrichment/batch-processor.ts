@@ -73,17 +73,9 @@ export async function submitBatchToFullEnrich(
     throw new Error('Batch size exceeds maximum of 100');
   }
 
-  // Get subscriber emails for the jobs
+  // Get subscriber records for the jobs
   const subscriberIds = jobs.map(job => job.subscriberId);
   
-  const subscriberRecords = await db
-    .select()
-    .from(subscribers)
-    .where(
-      eq(subscribers.id, subscriberIds[0])
-    );
-
-  // For multiple subscribers, we need to query them all
   const allSubscribers = await Promise.all(
     subscriberIds.map(async (id) => {
       const [subscriber] = await db
@@ -95,17 +87,27 @@ export async function submitBatchToFullEnrich(
     })
   );
 
-  const emails = allSubscribers
+  // Build contact data array for FullEnrich Reverse Email Lookup API
+  // This endpoint only needs email and custom fields (no enrich_fields needed)
+  const contactData = allSubscribers
     .filter(s => s !== undefined)
-    .map(s => s.email);
+    .map(s => {
+      return {
+        email: s.email,
+        custom: {
+          subscriber_id: s.id,
+        },
+      };
+    });
 
-  // Submit to FullEnrich API
+  // Submit to FullEnrich Reverse Email Lookup API
   const response = await client.bulkEnrich({
-    emails,
-    webhookUrl,
+    name: `Liwanag Reverse Lookup - ${new Date().toISOString()}`,
+    webhook_url: webhookUrl,
+    data: contactData,
   });
 
-  return response.enrichmentId;
+  return response.enrichment_id;
 }
 
 /**

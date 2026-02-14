@@ -7,9 +7,9 @@ export type EmailType = 'personal' | 'mobile' | 'corporate';
 
 /**
  * Estimate credits required for enrichment based on email type
- * - Personal email: 3 credits
+ * - Personal email: 3 credits (reverse email lookup)
  * - Mobile: 10 credits
- * - Corporate: 1 credit (but we don't enrich corporate emails)
+ * - Corporate: 1 credit (contact enrichment)
  */
 export function estimateCredits(emailType: EmailType): number {
   switch (emailType) {
@@ -20,28 +20,23 @@ export function estimateCredits(emailType: EmailType): number {
     case 'corporate':
       return 1;
     default:
-      return 3; // Default to personal email cost
+      return 1; // Default to corporate email cost
   }
 }
 
 /**
  * Create an enrichment job for a subscriber
- * Only creates jobs for personal email subscribers
+ * Creates jobs for all email subscribers (personal and corporate)
  * 
  * @param subscriberId - The subscriber ID
  * @param organizationId - The organization ID for multi-tenant support
- * @param emailType - The email type (default: 'personal')
+ * @param emailType - The email type (default: 'corporate')
  */
 export async function createEnrichmentJob(
   subscriberId: string,
   organizationId: string,
-  emailType: EmailType = 'personal'
+  emailType: EmailType = 'corporate'
 ): Promise<string> {
-  // Only create enrichment jobs for personal emails
-  if (emailType === 'corporate') {
-    throw new Error('Cannot create enrichment job for corporate email');
-  }
-
   const credits = estimateCredits(emailType);
 
   const newJob: NewEnrichmentJob = {
@@ -58,7 +53,7 @@ export async function createEnrichmentJob(
 }
 
 /**
- * Create enrichment job when a new personal email subscriber is added
+ * Create enrichment job when a new subscriber is added
  * This is the main entry point for automatic job creation
  * 
  * @param subscriberId - The subscriber ID
@@ -79,10 +74,7 @@ export async function createEnrichmentJobForSubscriber(
     throw new Error(`Subscriber not found: ${subscriberId}`);
   }
 
-  // Only create job for personal emails
-  if (subscriber.emailType !== 'personal') {
-    return null;
-  }
-
-  return createEnrichmentJob(subscriberId, organizationId, 'personal');
+  // Create job for all email types (personal and corporate)
+  const emailType = subscriber.emailType === 'personal' ? 'personal' : 'corporate';
+  return createEnrichmentJob(subscriberId, organizationId, emailType);
 }

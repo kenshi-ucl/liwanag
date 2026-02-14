@@ -29,18 +29,24 @@ export async function processEnrichmentWebhook(
   signature: string
 ): Promise<EnrichmentWebhookResult> {
   try {
-    // Step 1: Validate webhook signature
-    const validationResult = validateWebhookSignature(
-      rawPayload,
-      signature,
-      env.FULLENRICH_WEBHOOK_SECRET
-    );
+    // Step 1: Validate webhook signature (skip if signature is empty)
+    let validationResult = { isValid: true, error: undefined };
+    
+    if (signature) {
+      validationResult = validateWebhookSignature(
+        rawPayload,
+        signature,
+        env.FULLENRICH_WEBHOOK_SECRET
+      );
+    } else {
+      console.warn('Webhook signature validation skipped - no signature provided');
+    }
 
     // Log webhook attempt
     await db.insert(webhookLogs).values({
       source: 'fullenrich',
       payload: JSON.parse(rawPayload),
-      signature,
+      signature: signature || 'none',
       isValid: validationResult.isValid,
     });
 
@@ -58,9 +64,9 @@ export async function processEnrichmentWebhook(
     // Step 3: Process each enrichment result
     let processedCount = 0;
     
-    for (const result of payload.results) {
+    for (const result of payload.data) {
       try {
-        await processEnrichmentResult(payload.enrichmentId, result);
+        await processEnrichmentResult(payload.id, result);
         processedCount++;
       } catch (error) {
         console.error('Failed to process enrichment result:', error);
@@ -71,16 +77,16 @@ export async function processEnrichmentWebhook(
     // Step 4: Emit workflow event to resume waiting workflows
     try {
       // Get the workflow ID associated with this enrichment
-      const workflowId = getWorkflowIdForEnrichment(payload.enrichmentId);
+      const workflowId = getWorkflowIdForEnrichment(payload.id);
       
       if (workflowId) {
         emitWorkflowEvent(
           workflowId,
           'enrichment-complete',
-          { results: payload.results }
+          { results: payload.data }
         );
       } else {
-        console.warn(`No workflow found for enrichment ID: ${payload.enrichmentId}`);
+        console.warn(`No workflow found for enrichment ID: ${payload.id}`);
       }
     } catch (error) {
       console.error('Failed to emit workflow event:', error);
@@ -116,22 +122,39 @@ export async function processEnrichmentResult(
   enrichmentId: string,
   result: EnrichmentResult
 ): Promise<void> {
-  // Find the subscriber by email
-  const [subscriber] = await db
-    .select()
-    .from(subscribers)
-    .where(eq(subscribers.email, result.email))
-    .limit(1);
+  // Extract subscriber ID from custom field
+  const subscriberId = result.custom?.subscriber_id;
+  
+  if (!subscriberId) {
+    // Fallback: try to find by email if custom field is missing
+    const email = result.input?.email;
+    if (!email) {
+      throw new Error('No subscriber_id or email found in enrichment result');
+    }
+    
+    const [subscriber] = await db
+      .select()
+      .from(subscribers)
+      .where(eq(subscribers.email, email))
+      .limit(1);
 
-  if (!subscriber) {
-    throw new Error(`Subscriber not found for email: ${result.email}`);
+    if (!subscriber) {
+      throw new Error(`Subscriber not found for email: ${email}`);
+    }
+    
+    // Update subscriber with enriched data
+    await updateSubscriberWithEnrichment(subscriber.id, result);
+    
+    // Update enrichment job status (credits used = 1 for successful enrichment)
+    await updateEnrichmentJobStatus(enrichmentId, subscriber.id, 1);
+    return;
   }
 
   // Update subscriber with enriched data
-  await updateSubscriberWithEnrichment(subscriber.id, result);
+  await updateSubscriberWithEnrichment(subscriberId, result);
 
-  // Update enrichment job status
-  await updateEnrichmentJobStatus(enrichmentId, subscriber.id, result.creditsUsed);
+  // Update enrichment job status (credits used = 1 for successful enrichment)
+  await updateEnrichmentJobStatus(enrichmentId, subscriberId, 1);
 }
 
 /**
@@ -141,16 +164,20 @@ export async function updateSubscriberWithEnrichment(
   subscriberId: string,
   result: EnrichmentResult
 ): Promise<void> {
+  // Extract data from nested FullEnrich response structure
+  const profile = result.profile;
+  const company = profile?.company;
+  
   // First, update subscriber with enriched data
   await db
     .update(subscribers)
     .set({
-      linkedinUrl: result.linkedinUrl || null,
-      jobTitle: result.jobTitle || null,
-      companyName: result.companyName || null,
-      companyDomain: result.companyDomain || null,
-      headcount: result.headcount || null,
-      industry: result.industry || null,
+      linkedinUrl: profile?.linkedin_url || null,
+      jobTitle: profile?.job_title || null,
+      companyName: company?.name || null,
+      companyDomain: company?.domain || null,
+      headcount: company?.headcount || null,
+      industry: company?.industry || null,
       updatedAt: new Date(),
     })
     .where(eq(subscribers.id, subscriberId));

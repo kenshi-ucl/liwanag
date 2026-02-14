@@ -41,7 +41,7 @@ export class FullEnrichClient {
 
   constructor(
     apiKey?: string,
-    baseUrl: string = 'https://api.fullenrich.com/v1',
+    baseUrl: string = 'https://app.fullenrich.com/api',
     retryConfig: RetryConfig = defaultRetryConfig
   ) {
     this.apiKey = apiKey || env.FULLENRICH_API_KEY;
@@ -51,20 +51,33 @@ export class FullEnrichClient {
 
   /**
    * Submit bulk enrichment request to FullEnrich API
+   * Uses Reverse Email Lookup endpoint since we only have email addresses
    */
   async bulkEnrich(request: BulkEnrichmentRequest): Promise<BulkEnrichmentResponse> {
-    // Validate request
-    const validatedRequest = bulkEnrichmentRequestSchema.parse(request);
+    try {
+      // Log the request for debugging
+      console.log('FullEnrich API Request:', JSON.stringify(request, null, 2));
+      
+      // Validate request
+      const validatedRequest = bulkEnrichmentRequestSchema.parse(request);
+      
+      console.log('FullEnrich API Validated Request:', JSON.stringify(validatedRequest, null, 2));
 
-    // Make API call with retry logic
-    const response = await this.makeRequest('/bulk-enrich', {
-      method: 'POST',
-      body: JSON.stringify(validatedRequest),
-    });
+      // Make API call with retry logic - use Reverse Email Lookup endpoint
+      const response = await this.makeRequest('/v2/contact/reverse/email/bulk', {
+        method: 'POST',
+        body: JSON.stringify(validatedRequest),
+      });
 
-    // Validate response
-    const validatedResponse = bulkEnrichmentResponseSchema.parse(response);
-    return validatedResponse;
+      console.log('FullEnrich API Response:', JSON.stringify(response, null, 2));
+
+      // Validate response
+      const validatedResponse = bulkEnrichmentResponseSchema.parse(response);
+      return validatedResponse;
+    } catch (error) {
+      console.error('FullEnrich API Error:', error);
+      throw error;
+    }
   }
 
   /**

@@ -17,6 +17,7 @@ const envSchema = z.object({
   // FullEnrich API configuration
   FULLENRICH_API_KEY: z.string().min(1).describe('FullEnrich API key'),
   FULLENRICH_WEBHOOK_URL: z.string().min(1).describe('FullEnrich webhook callback URL'),
+  USE_MOCK_ENRICHMENT: z.string().optional().describe('Set to "true" to use mock enrichment, "false" for real API'),
   
   // Webhook signing secrets
   NEWSLETTER_WEBHOOK_SECRET: z.string().min(1).describe('Newsletter webhook signing secret'),
